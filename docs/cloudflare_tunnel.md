@@ -58,7 +58,7 @@ TradingView webhook 官方限制：
 5. 建立 ~/.cloudflared/config.yml：
 
        tunnel: bingx-trading-bot
-       credentials-file: /Users/dc/.cloudflared/<TUNNEL_ID>.json
+       credentials-file: /path/to/.cloudflared/<TUNNEL_ID>.json
        ingress:
          - hostname: tv-bot.your-domain.com
            service: http://127.0.0.1:8787
@@ -66,7 +66,7 @@ TradingView webhook 官方限制：
 
 6. 啟動 bot：
 
-       cd /Users/dc/Workspace/bingx-trading-bot
+       cd /path/to/bingx-trading-bot
        .venv/bin/python -m src.webhook
 
 7. 另一個 terminal 啟動 tunnel：

@@ -24,7 +24,7 @@ TradingView webhook 官方限制重點：
 
 ## 1. 先啟動本機 puller
 
-    cd /Users/dc/Workspace/bingx-trading-bot
+    cd /path/to/bingx-trading-bot
     .venv/bin/python -u -m src.pubsub_puller
 
 `-u` 可以讓收到訊號時即時印出來。
@@ -124,8 +124,8 @@ TradingView 建立 alert 時，Condition 選這個 indicator，觸發方式選 `
 
 等 TradingView alert 真的送到本機 puller 後，再更新 Cloud Run：
 
-    gcloud run services update bingx-tv-webhook \
-      --region asia-east1 \
+    gcloud run services update your-cloud-run-service-name \
+      --region your-cloud-run-region \
       --update-env-vars ENFORCE_WEBHOOK_IP_ALLOWLIST=true
 
 如果開啟後被擋，再看 Cloud Run logs 的 `source_ip`。

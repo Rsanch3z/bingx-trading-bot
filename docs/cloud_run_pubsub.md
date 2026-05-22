@@ -25,7 +25,8 @@ Cloud Run receiver 不需要 BingX API key，它只驗證 TradingView alert、�
 設定你的 project id：
 
     export PROJECT_ID=你的-google-cloud-project-id
-    export REGION=asia-east1
+    export REGION=your-cloud-run-region
+    export SERVICE_NAME=your-cloud-run-service-name
     gcloud config set project $PROJECT_ID
 
 啟用服務：
@@ -56,9 +57,9 @@ Cloud Run receiver 不需要 BingX API key，它只驗證 TradingView alert、�
 
 從專案根目錄執行：
 
-    cd /Users/dc/Workspace/bingx-trading-bot
+    cd /path/to/bingx-trading-bot
 
-    gcloud run deploy bingx-tv-webhook \
+    gcloud run deploy $SERVICE_NAME \
       --source . \
       --region $REGION \
       --allow-unauthenticated \
@@ -67,7 +68,7 @@ Cloud Run receiver 不需要 BingX API key，它只驗證 TradingView alert、�
 
 取得固定 URL：
 
-    gcloud run services describe bingx-tv-webhook \
+    gcloud run services describe $SERVICE_NAME \
       --region $REGION \
       --format='value(status.url)'
 
@@ -89,7 +90,7 @@ TradingView webhook URL 填這個 run.app URL。
 
 啟動本機 puller：
 
-    cd /Users/dc/Workspace/bingx-trading-bot
+    cd /path/to/bingx-trading-bot
     .venv/bin/python -m src.pubsub_puller
 
 ## 5. TradingView alert JSON
@@ -120,7 +121,7 @@ TradingView 官方 webhook 來源 IP：
 
 Cloud Run 測通後，可以更新服務：
 
-    gcloud run services update bingx-tv-webhook \
+    gcloud run services update $SERVICE_NAME \
       --region $REGION \
       --update-env-vars ENFORCE_WEBHOOK_IP_ALLOWLIST=true
 

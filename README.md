@@ -47,7 +47,7 @@ BINGX_API_SECRET=
 BINGX_SANDBOX=true
 BINGX_API_BASE_URL=https://open-api-vst.bingx.com
 
-TEST_ORDER_SYMBOL=DOGE/USDT:USDT
+TEST_ORDER_SYMBOL=BTC/USDT:USDT
 TEST_ORDER_NOTIONAL_USDT=5
 LEVERAGE=1
 
@@ -59,7 +59,7 @@ PUBSUB_SUBSCRIPTION=tradingview-alerts-local-bot
 
 ## TradingView Alert JSON
 
-Use `ticker` for TradingView symbols. The receiver normalizes examples like `DOGEUSDT.P` to `DOGE/USDT:USDT`.
+Use `ticker` for TradingView symbols. The receiver normalizes examples like `BTCUSDT.P` to `BTC/USDT:USDT`.
 
 ```json
 {
@@ -105,7 +105,7 @@ Run the local puller to consume Pub/Sub messages:
 Expected output:
 
 ```text
-processed message_id=... result={'ok': True, 'received': True, 'signal_id': '...', 'symbol': 'DOGE/USDT:USDT', ...}
+processed message_id=... result={'ok': True, 'received': True, 'signal_id': '...', 'symbol': 'BTC/USDT:USDT', ...}
 ```
 
 ## BingX VST/Demo Checks
@@ -125,7 +125,7 @@ Manual orders are protected by two switches:
 - `.env` must be overridden with `DRY_RUN=false`
 - `CONFIRM_BINGX_ORDER=yes` must be present
 
-Example: place a small DOGE VST/demo long market order with TP/SL at +/- 50% from the reference price:
+Example: place a small VST/demo long market order with TP/SL at +/- 50% from the reference price:
 
 ```bash
 DRY_RUN=false \
