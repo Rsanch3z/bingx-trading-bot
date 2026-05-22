@@ -141,11 +141,33 @@ Keep `TEST_ORDER_NOTIONAL_USDT` small until the full path is verified.
 ## Safety
 
 - Never commit `.env`.
+- Never commit real Cloud Run URLs, GCP project IDs, API keys, webhook secrets, logs, or trade journals.
 - Use BingX VST/demo keys first.
 - Do not enable withdrawal permissions on API keys.
+- Do not enable transfer permissions unless you have a specific, reviewed reason.
 - Keep `DRY_RUN=true` unless you are intentionally testing an order.
 - Prefer IP allowlists for production API keys.
 - Verify TP/SL behavior in demo before using live funds.
+- Live trading is at your own risk. Review exchange behavior, fees, slippage, liquidation risk, and all order parameters before using real funds.
+
+## Public Release Checklist
+
+Before making a repository public, run:
+
+```bash
+git log --all -- .env
+git ls-files | grep -E '(^\.env$|data/|\.csv|key|secret)' || true
+git grep -n "BINGX_API_KEY\|BINGX_API_SECRET\|WEBHOOK_SECRET" || true
+```
+
+Expected outcome:
+
+- `.env` has never been committed.
+- `data/`, CSV journals, and local logs are not tracked.
+- Any API key or secret hits are placeholders, documentation examples, or environment variable names only.
+- Cloud Run webhook URLs are placeholders, not live deployment URLs.
+
+Enable GitHub secret scanning and push protection before public release when available for the repository/account.
 
 ## Tests
 
