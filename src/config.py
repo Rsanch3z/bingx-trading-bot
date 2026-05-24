@@ -42,6 +42,7 @@ class Settings:
     target_wallet_balance_usdt: float
     active_positions_path: str
     max_signal_age_seconds: int
+    min_win_rate: float
     symbol: str
     timeframe: str
     candle_limit: int
@@ -87,6 +88,7 @@ def load_settings() -> Settings:
         target_wallet_balance_usdt=_float("TARGET_WALLET_BALANCE", 1000.0),
         active_positions_path=os.getenv("ACTIVE_POSITIONS_PATH", "data/active_positions.json"),
         max_signal_age_seconds=_int("MAX_SIGNAL_AGE_SECONDS", 30),
+        min_win_rate=_float("MIN_WIN_RATE", 0.50),
         symbol=os.getenv("SYMBOL", "BTC/USDT:USDT"),
         timeframe=os.getenv("TIMEFRAME", "5m"),
         candle_limit=_int("CANDLE_LIMIT", 120),

@@ -27,6 +27,7 @@ def _settings(path: str) -> Settings:
         target_wallet_balance_usdt=1000,
         active_positions_path=path,
         max_signal_age_seconds=30,
+        min_win_rate=0.50,
         symbol="BTC/USDT:USDT",
         timeframe="5m",
         candle_limit=120,
@@ -172,6 +173,28 @@ class StrategyExecutorTest(unittest.TestCase):
 
             self.assertFalse(result["opened"])
             self.assertEqual(result["reason"], "insufficient available balance")
+
+    def test_execute_alert_entry_rejects_low_win_rate(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = str(Path(temp_dir) / "active.json")
+            settings = _settings(path)
+            alert = alert_from_payload({
+                "signal_id": "btc-long",
+                "symbol": "BTC/USDT:USDT",
+                "side": "long",
+                "entry": 100,
+                "tp": 110,
+                "tp2": 120,
+                "sl": 95,
+                "win_rate": 0.49,
+                "rr": 2.0,
+            })
+
+            result = execute_alert_entry(alert, settings, FakeClient(), ActivePositionStore(path))
+
+            self.assertFalse(result["opened"])
+            self.assertEqual(result["reason"], "win_rate below minimum")
+            self.assertEqual(result["min_win_rate"], 0.50)
 
     def test_monitor_closes_tp1_and_moves_stop_to_tp1(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

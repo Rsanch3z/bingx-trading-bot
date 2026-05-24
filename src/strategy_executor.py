@@ -29,6 +29,15 @@ def execute_alert_entry(
             "max_signal_age_seconds": settings.max_signal_age_seconds,
         }
 
+    if alert.win_rate < settings.min_win_rate:
+        return {
+            "ok": True,
+            "opened": False,
+            "reason": "win_rate below minimum",
+            "win_rate": alert.win_rate,
+            "min_win_rate": settings.min_win_rate,
+        }
+
     sync_results = sync_positions_with_exchange(client, store)
     if sync_results:
         print(f"position_sync results={sync_results}")
