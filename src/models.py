@@ -9,6 +9,15 @@ class SignalSide(str, Enum):
     FLAT = "flat"
 
 
+class PositionStatus(str, Enum):
+    OPEN = "open"
+    TP1_HIT = "tp1_hit"
+    CLOSED_BY_TP2 = "closed_by_tp2"
+    CLOSED_BY_SL = "closed_by_sl"
+    MANUALLY_CLOSED = "manually_closed"
+    STALE_MISSING_ON_EXCHANGE = "stale_missing_on_exchange"
+
+
 @dataclass(frozen=True)
 class Candle:
     timestamp_ms: int
@@ -45,3 +54,29 @@ class OrderResult:
     order_id: str
     status: str
     message: str
+
+
+@dataclass(frozen=True)
+class ManagedPosition:
+    signal_id: str
+    symbol: str
+    side: SignalSide
+    entry_price: float
+    quantity: float
+    remaining_quantity: float
+    notional_usdt: float
+    margin_usdt: float
+    leverage: int
+    stop_loss_price: float
+    current_stop_loss_price: float
+    take_profit_1_price: float
+    take_profit_2_price: float
+    tp1_closed: bool
+    closed: bool
+    entry_order_id: str
+    stop_loss_order_id: str = ""
+    take_profit_1_order_id: str = ""
+    take_profit_2_order_id: str = ""
+    status: PositionStatus = PositionStatus.OPEN
+    closed_reason: str = ""
+    closed_at: str = ""

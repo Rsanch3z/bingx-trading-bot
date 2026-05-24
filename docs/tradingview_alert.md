@@ -53,6 +53,7 @@ TradingView webhook 官方限制重點：
       "side": "long",
       "entry": 78000,
       "tp": 79200,
+      "tp2": 80400,
       "sl": 77400,
       "win_rate": 0.55,
       "rr": 2.0,
@@ -94,13 +95,14 @@ TradingView webhook 官方限制重點：
     longSignal = ta.crossover(fast, slow)
     shortSignal = ta.crossunder(fast, slow)
 
-    makePayload(side, entry, tp, sl) =>
+    makePayload(side, entry, tp, tp2, sl) =>
         '{"secret":"' + secret + '"' +
         ',"signal_id":"' + syminfo.ticker + '-' + timeframe.period + '-' + str.tostring(time) + '-' + side + '"' +
         ',"ticker":"' + syminfo.ticker + '"' +
         ',"side":"' + side + '"' +
         ',"entry":' + str.tostring(entry) +
         ',"tp":' + str.tostring(tp) +
+        ',"tp2":' + str.tostring(tp2) +
         ',"sl":' + str.tostring(sl) +
         ',"win_rate":' + str.tostring(winRate) +
         ',"rr":' + str.tostring(rr) +
@@ -109,14 +111,16 @@ TradingView webhook 官方限制重點：
     if longSignal
         entry = close
         tp = entry * (1 + tpPct)
+        tp2 = entry * (1 + tpPct * 2)
         sl = entry * (1 - slPct)
-        alert(makePayload("long", entry, tp, sl), alert.freq_once_per_bar_close)
+        alert(makePayload("long", entry, tp, tp2, sl), alert.freq_once_per_bar_close)
 
     if shortSignal
         entry = close
         tp = entry * (1 - tpPct)
+        tp2 = entry * (1 - tpPct * 2)
         sl = entry * (1 + slPct)
-        alert(makePayload("short", entry, tp, sl), alert.freq_once_per_bar_close)
+        alert(makePayload("short", entry, tp, tp2, sl), alert.freq_once_per_bar_close)
 
 TradingView 建立 alert 時，Condition 選這個 indicator，觸發方式選 `Any alert() function call`。
 

@@ -49,7 +49,12 @@ BINGX_API_BASE_URL=https://open-api-vst.bingx.com
 
 TEST_ORDER_SYMBOL=BTC/USDT:USDT
 TEST_ORDER_NOTIONAL_USDT=5
-LEVERAGE=1
+LEVERAGE=8
+
+EXECUTE_TRADINGVIEW_ORDERS=false
+TRADE_MARGIN=5
+MAX_TOTAL_POSITIONS=7
+TARGET_WALLET_BALANCE=1000
 
 WEBHOOK_SECRET=replace-with-a-long-random-secret
 GCP_PROJECT_ID=
@@ -70,6 +75,7 @@ Use `ticker` for TradingView symbols. The receiver normalizes examples like `BTC
   "side_note": "1=long,-1=short",
   "entry": 0.10603,
   "tp": 0.10613,
+  "tp2": 0.10642,
   "sl": 0.10584,
   "win_rate": 0.7189,
   "rr": 0.5263,
@@ -107,6 +113,38 @@ Expected output:
 ```text
 processed message_id=... result={'ok': True, 'received': True, 'signal_id': '...', 'symbol': 'BTC/USDT:USDT', ...}
 ```
+
+## TradingView Order Execution
+
+By default, the puller only receives and prints alerts. To enable BingX order execution from TradingView alerts, set:
+
+```env
+EXECUTE_TRADINGVIEW_ORDERS=true
+DRY_RUN=false
+TRADE_MARGIN=5
+LEVERAGE=8
+MAX_TOTAL_POSITIONS=7
+TARGET_WALLET_BALANCE=1000
+```
+
+Current execution rules:
+
+- available wallet balance must be at least `TRADE_MARGIN`
+- notional size is fixed at `TRADE_MARGIN * LEVERAGE`
+- the same symbol can have only one active position
+- no more than `MAX_TOTAL_POSITIONS` symbols may be open
+- reaching `TARGET_WALLET_BALANCE` logs a graduation signal instead of opening new trades
+- alert payload must include `tp2` for staged exits
+
+The entry executor stores active position state in `ACTIVE_POSITIONS_PATH`, defaulting to `data/active_positions.json`.
+
+Run the monitor once to handle TP/SL exits:
+
+```bash
+.venv/bin/python -m src.monitor_positions
+```
+
+When price reaches TP1, the monitor closes 60% of the position and moves the tracked stop to TP1. When price reaches TP2, it closes the remaining 40%.
 
 ## BingX VST/Demo Checks
 

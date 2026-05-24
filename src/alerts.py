@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from src.config import load_settings
 from src.models import Signal, SignalSide
@@ -16,6 +16,7 @@ class TradingAlert:
     side: SignalSide
     entry: float
     take_profit: float
+    take_profit_2: Optional[float]
     stop_loss: float
     win_rate: float
     win_loss_ratio: float
@@ -34,6 +35,7 @@ class TradingAlert:
         data = asdict(self)
         data["side"] = self.side.value
         data["tp"] = data.pop("take_profit")
+        data["tp2"] = data.pop("take_profit_2")
         data["sl"] = data.pop("stop_loss")
         data["rr"] = data.pop("win_loss_ratio")
         data["source_ip"] = source_ip
@@ -100,6 +102,7 @@ def alert_from_payload(payload: dict[str, Any]) -> TradingAlert:
     side = parse_side(payload.get("side", payload.get("side_code")))
     entry = _as_float(payload, "entry")
     take_profit = _as_float(payload, "tp")
+    take_profit_2 = float(payload["tp2"]) if payload.get("tp2") not in (None, "") else None
     stop_loss = _as_float(payload, "sl")
     win_rate = _as_float(payload, "win_rate")
     win_loss_ratio = float(payload.get("win_loss_ratio") or payload.get("rr") or 1.5)
@@ -118,6 +121,11 @@ def alert_from_payload(payload: dict[str, Any]) -> TradingAlert:
         raise ValueError("long signal requires sl < entry < tp")
     if side == SignalSide.SHORT and not take_profit < entry < stop_loss:
         raise ValueError("short signal requires tp < entry < sl")
+    if take_profit_2 is not None:
+        if side == SignalSide.LONG and not take_profit <= take_profit_2:
+            raise ValueError("long signal requires tp <= tp2")
+        if side == SignalSide.SHORT and not take_profit_2 <= take_profit:
+            raise ValueError("short signal requires tp2 <= tp")
 
     return TradingAlert(
         signal_id=signal_id,
@@ -125,6 +133,7 @@ def alert_from_payload(payload: dict[str, Any]) -> TradingAlert:
         side=side,
         entry=entry,
         take_profit=take_profit,
+        take_profit_2=take_profit_2,
         stop_loss=stop_loss,
         win_rate=win_rate,
         win_loss_ratio=win_loss_ratio,
