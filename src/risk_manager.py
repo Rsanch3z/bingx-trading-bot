@@ -1,4 +1,5 @@
 import logging
+import threading
 from dataclasses import dataclass, field
 from datetime import date
 
@@ -20,6 +21,7 @@ class RiskManager:
     def __init__(self, config: Config):
         self.config = config
         self.state = RiskState()
+        self._lock = threading.RLock()
 
     def _reset_daily_if_needed(self):
         today = date.today()
@@ -30,43 +32,46 @@ class RiskManager:
             logger.info("Daily risk counters reset")
 
     def update_daily_loss(self, loss_pct: float):
-        self._reset_daily_if_needed()
-        self.state.daily_realized_loss_pct += loss_pct
-        if self.state.daily_realized_loss_pct >= self.config.max_daily_loss_pct:
-            self.state.circuit_breaker_active = True
-            logger.warning(
-                "Circuit breaker triggered: daily loss %.2f%% >= %.2f%%",
-                self.state.daily_realized_loss_pct,
-                self.config.max_daily_loss_pct,
-            )
+        with self._lock:
+            self._reset_daily_if_needed()
+            self.state.daily_realized_loss_pct += loss_pct
+            if self.state.daily_realized_loss_pct >= self.config.max_daily_loss_pct:
+                self.state.circuit_breaker_active = True
+                logger.warning(
+                    "Circuit breaker triggered: daily loss %.2f%% >= %.2f%%",
+                    self.state.daily_realized_loss_pct,
+                    self.config.max_daily_loss_pct,
+                )
 
     def update_position_count(self, count: int):
-        self.state.open_position_count = count
+        with self._lock:
+            self.state.open_position_count = count
 
     def evaluate(self, signal: TradeSignal) -> tuple[bool, str]:
-        self._reset_daily_if_needed()
+        with self._lock:
+            self._reset_daily_if_needed()
 
-        if signal.close_position:
-            return True, "close_position bypasses risk checks"
+            if signal.close_position:
+                return True, "close_position bypasses risk checks"
 
-        if self.state.circuit_breaker_active:
-            return False, (
-                f"circuit breaker active: daily loss "
-                f"{self.state.daily_realized_loss_pct:.2f}% >= "
-                f"{self.config.max_daily_loss_pct}%"
-            )
+            if self.state.circuit_breaker_active:
+                return False, (
+                    f"circuit breaker active: daily loss "
+                    f"{self.state.daily_realized_loss_pct:.2f}% >= "
+                    f"{self.config.max_daily_loss_pct}%"
+                )
 
-        if self.state.open_position_count >= self.config.max_open_positions:
-            return False, (
-                f"max open positions reached: "
-                f"{self.state.open_position_count}/{self.config.max_open_positions}"
-            )
+            if self.state.open_position_count >= self.config.max_open_positions:
+                return False, (
+                    f"max open positions reached: "
+                    f"{self.state.open_position_count}/{self.config.max_open_positions}"
+                )
 
-        if signal.size_pct > self.config.max_single_trade_pct:
-            logger.warning(
-                "size_pct %.2f clamped to %.2f",
-                signal.size_pct, self.config.max_single_trade_pct,
-            )
-            signal.size_pct = self.config.max_single_trade_pct
+            if signal.size_pct > self.config.max_single_trade_pct:
+                logger.warning(
+                    "size_pct %.2f clamped to %.2f",
+                    signal.size_pct, self.config.max_single_trade_pct,
+                )
+                signal.size_pct = self.config.max_single_trade_pct
 
-        return True, "ok"
+            return True, "ok"
