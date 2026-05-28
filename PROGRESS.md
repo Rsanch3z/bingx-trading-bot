@@ -13,6 +13,8 @@
 | 2026-05-28 | Pub/Sub subscriber | ✅ 完成 | streaming pull, ACK on success, NACK on error |
 | 2026-05-28 | Position monitor | ✅ 完成 | background thread, PROGRESS.md auto-update |
 | 2026-05-28 | Main entry point | ✅ 完成 | wires subscriber + risk + executor + monitor |
+| 2026-05-28 | Windows Service | ✅ 完成 | NSSM install/uninstall scripts, log rotation |
+| 2026-05-28 | Demo test checklist | 📋 待執行 | 需要 BingX API key + GCP project 才能執行 |
 
 ## 待辦清單
 
@@ -25,8 +27,8 @@
 - [x] Task 7: Pub/Sub subscriber
 - [x] Task 8: Position monitor
 - [x] Task 9: Main entry point
-- [ ] Task 10: Windows Service setup
-- [ ] Task 11: End-to-end demo test
+- [x] Task 10: Windows Service setup
+- [ ] Task 11: End-to-end demo test (manual — see live switching checklist at bottom of plan)
 
 ## 架構（簡版）
 
@@ -37,3 +39,15 @@ TradingView → Cloud Run → Pub/Sub → Windows Bot → BingX API
 ## Bot 狀態（由 position_monitor 自動更新）
 
 _Bot 尚未啟動_
+
+## 下一步 (Next Steps)
+
+1. 取得 BingX VST demo API key（BingX → API Management → 新增）
+2. 建立 GCP project，確認計費已啟用
+3. 執行 `bash scripts/setup_gcp.sh <PROJECT_ID> asia-east1 <SECRET>`
+4. 複製 `config/.env.example` 到 `.env` 並填入所有值
+5. 前台執行 `python -m src.main` 測試訊號流
+6. 手動 POST 測試 webhook（見 plan Task 11 步驟）
+7. 驗證所有風控機制
+8. 安裝 Windows Service: `scripts\install_service.ps1`
+9. 確認 demo 測試通過後再改 `.env` 為 live mode
