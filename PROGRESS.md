@@ -5,11 +5,12 @@
 | 日期 | 里程碑 | 狀態 | 備註 |
 |------|--------|------|------|
 | 2026-05-28 | 專案初始化 | ✅ 完成 | Fork + 目錄結構建立 |
+| 2026-05-28 | Config module | ✅ 完成 | typed config, dotenv, unit tests |
 
 ## 待辦清單
 
 - [x] Task 1: Fork repo + project setup
-- [ ] Task 2: Config module
+- [x] Task 2: Config module
 - [ ] Task 3: Cloud Run webhook receiver
 - [ ] Task 4: GCP infrastructure setup
 - [ ] Task 5: BingX executor
