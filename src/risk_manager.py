@@ -72,6 +72,7 @@ class RiskManager:
                     "size_pct %.2f clamped to %.2f",
                     signal.size_pct, self.config.max_single_trade_pct,
                 )
+                # Intentionally mutates signal.size_pct so downstream executor uses the clamped value
                 signal.size_pct = self.config.max_single_trade_pct
 
             return True, "ok"

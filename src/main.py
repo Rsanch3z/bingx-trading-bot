@@ -1,7 +1,8 @@
 import logging
+import platform
 import signal
 import sys
-from concurrent.futures import TimeoutError
+from concurrent.futures import CancelledError, TimeoutError
 
 from .bingx_executor import BingXExecutor, TradeSignal
 from .config import load_config
@@ -60,13 +61,14 @@ def run():
         streaming_pull.result(timeout=5)
         sys.exit(0)
 
-    signal.signal(signal.SIGTERM, _shutdown)
+    if platform.system() != "Windows":
+        signal.signal(signal.SIGTERM, _shutdown)
     signal.signal(signal.SIGINT, _shutdown)
 
     logger.info("Bot running. Press Ctrl+C to stop.")
     try:
         streaming_pull.result()
-    except TimeoutError:
+    except (TimeoutError, CancelledError):
         streaming_pull.cancel()
         streaming_pull.result(timeout=5)
 

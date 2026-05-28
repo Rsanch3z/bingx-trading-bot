@@ -52,10 +52,14 @@ class BingXExecutor:
         return data
 
     def get_balance(self) -> float:
+        if self.config.dry_run:
+            return 10000.0  # simulated balance for dry-run
         data = self._request("GET", "/openApi/swap/v2/user/balance", {})
         return float(data["data"]["balance"]["balance"])
 
     def get_open_positions(self) -> list:
+        if self.config.dry_run:
+            return []  # no positions in dry-run
         data = self._request("GET", "/openApi/swap/v2/trade/openPositions", {})
         return data.get("data", {}).get("positions", [])
 

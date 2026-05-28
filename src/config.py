@@ -27,6 +27,8 @@ def load_config() -> Config:
         bingx_api_key=os.environ["BINGX_API_KEY"],
         bingx_api_secret=os.environ["BINGX_API_SECRET"],
         bingx_mode=os.getenv("BINGX_MODE", "demo"),
+        # bingx_sandbox controls BingX VST demo mode - same endpoint, different API key
+        # VST demo key from BingX API Management will paper-trade without real money
         bingx_sandbox=os.getenv("BINGX_SANDBOX", "true").lower() == "true",
         pubsub_project_id=os.environ["PUBSUB_PROJECT_ID"],
         pubsub_subscription=os.getenv("PUBSUB_SUBSCRIPTION", "local-bot-sub"),

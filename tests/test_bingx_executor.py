@@ -75,8 +75,8 @@ def test_close_position_sends_opposite_side(live_config):
     assert params["side"] == "SELL"
 
 
-def test_get_balance_parses_response(demo_config):
-    executor = BingXExecutor(demo_config)
+def test_get_balance_parses_response(live_config):
+    executor = BingXExecutor(live_config)
     mock_resp = {"data": {"balance": {"balance": "5000.00"}}, "code": 0}
     with patch.object(executor, "_request", return_value=mock_resp):
         bal = executor.get_balance()

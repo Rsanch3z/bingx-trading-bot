@@ -10,14 +10,31 @@ from .config import Config
 logger = logging.getLogger(__name__)
 
 
+VALID_ACTIONS = {"BUY", "SELL", "CLOSE"}
+VALID_SIDES = {"LONG", "SHORT"}
+
+
 def _parse_message(data: bytes) -> TradeSignal:
     payload = json.loads(data.decode("utf-8"))
+
+    action = payload["action"]
+    if action not in VALID_ACTIONS:
+        raise ValueError(f"Invalid action: {action!r}. Must be one of {VALID_ACTIONS}")
+
+    side = payload.get("side", "LONG")
+    if side not in VALID_SIDES:
+        raise ValueError(f"Invalid side: {side!r}. Must be one of {VALID_SIDES}")
+
+    size_pct = float(payload.get("size_pct", 1.0))
+    if size_pct < 0:
+        raise ValueError(f"size_pct must be >= 0, got {size_pct}")
+
     return TradeSignal(
         symbol=payload["symbol"],
-        action=payload["action"],
-        side=payload.get("side", "LONG"),
+        action=action,
+        side=side,
         order_type=payload.get("order_type", "MARKET"),
-        size_pct=float(payload.get("size_pct", 1.0)),
+        size_pct=size_pct,
         tp_pct=float(payload.get("tp_pct", 0.0)),
         sl_pct=float(payload.get("sl_pct", 0.0)),
         close_position=bool(payload.get("close_position", False)),
