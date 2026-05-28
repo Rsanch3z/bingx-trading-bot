@@ -8,6 +8,7 @@
 | 2026-05-28 | Config module | ✅ 完成 | typed config, dotenv, unit tests |
 | 2026-05-28 | Cloud Run webhook receiver | ✅ 完成 | FastAPI, secret validation, Pub/Sub publish |
 | 2026-05-28 | GCP setup script | ✅ 完成 | Pub/Sub + Cloud Run one-shot deploy |
+| 2026-05-28 | BingX executor | ✅ 完成 | HMAC auth, place/close order, dry-run mode |
 
 ## 待辦清單
 
@@ -15,7 +16,7 @@
 - [x] Task 2: Config module
 - [x] Task 3: Cloud Run webhook receiver
 - [x] Task 4: GCP infrastructure setup
-- [ ] Task 5: BingX executor
+- [x] Task 5: BingX executor
 - [ ] Task 6: Risk manager
 - [ ] Task 7: Pub/Sub subscriber
 - [ ] Task 8: Position monitor
