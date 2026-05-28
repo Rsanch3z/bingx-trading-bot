@@ -1,6 +1,8 @@
+import hmac
 import json
 import os
 import logging
+from json import JSONDecodeError
 from fastapi import FastAPI, HTTPException, Request
 from google.cloud import pubsub_v1
 
@@ -19,10 +21,10 @@ TOPIC_ID = "tradingview-alerts"
 async def receive_alert(request: Request):
     try:
         body = await request.json()
-    except Exception:
+    except (ValueError, JSONDecodeError):
         raise HTTPException(status_code=400, detail="Invalid JSON")
 
-    if body.get("secret") != WEBHOOK_SECRET:
+    if not hmac.compare_digest(body.get("secret", ""), WEBHOOK_SECRET):
         logger.warning("Alert rejected: invalid secret")
         raise HTTPException(status_code=403, detail="Invalid secret")
 
@@ -30,7 +32,11 @@ async def receive_alert(request: Request):
     topic_path = publisher.topic_path(PROJECT_ID, TOPIC_ID)
     data = json.dumps(payload).encode("utf-8")
     future = publisher.publish(topic_path, data)
-    future.result()
+    try:
+        future.result(timeout=10)
+    except Exception as exc:
+        logger.error("Failed to publish alert: %s", exc)
+        raise HTTPException(status_code=500, detail="Publish failed")
 
     logger.info(f"Alert published: {payload.get('symbol')} {payload.get('action')}")
     return {"status": "ok"}

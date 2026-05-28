@@ -60,3 +60,28 @@ def test_alert_accepts_valid_secret_and_publishes(client):
     published = json.loads(mock_pub.publish.call_args[0][1].decode())
     assert "secret" not in published
     assert published["symbol"] == "BTC-USDT"
+
+
+def test_alert_returns_500_on_publish_failure(client):
+    payload = {
+        "secret": VALID_SECRET,
+        "symbol": "BTC-USDT",
+        "action": "BUY",
+        "side": "LONG",
+        "order_type": "MARKET",
+        "size_pct": 5.0,
+        "tp_pct": 2.0,
+        "sl_pct": 1.0,
+        "close_position": False,
+        "strategy": "test",
+        "timestamp": "2026-05-28T00:00:00Z",
+    }
+    mock_future = MagicMock()
+    mock_future.result.side_effect = Exception("Pub/Sub unavailable")
+
+    with patch("main.publisher") as mock_pub:
+        mock_pub.topic_path.return_value = "projects/test-project/topics/tradingview-alerts"
+        mock_pub.publish.return_value = mock_future
+        resp = client.post("/alert", json=payload)
+
+    assert resp.status_code == 500
