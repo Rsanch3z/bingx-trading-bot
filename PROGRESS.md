@@ -10,6 +10,7 @@
 | 2026-05-28 | GCP setup script | ✅ 完成 | Pub/Sub + Cloud Run one-shot deploy |
 | 2026-05-28 | BingX executor | ✅ 完成 | HMAC auth, place/close order, dry-run mode |
 | 2026-05-28 | Risk manager | ✅ 完成 | circuit breaker, position limit, size cap, daily reset |
+| 2026-05-28 | Pub/Sub subscriber | ✅ 完成 | streaming pull, ACK on success, NACK on error |
 
 ## 待辦清單
 
@@ -19,7 +20,7 @@
 - [x] Task 4: GCP infrastructure setup
 - [x] Task 5: BingX executor
 - [x] Task 6: Risk manager
-- [ ] Task 7: Pub/Sub subscriber
+- [x] Task 7: Pub/Sub subscriber
 - [ ] Task 8: Position monitor
 - [ ] Task 9: Main entry point
 - [ ] Task 10: Windows Service setup
