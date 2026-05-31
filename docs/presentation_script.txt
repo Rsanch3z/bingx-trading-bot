@@ -1,0 +1,592 @@
+BingX Algo Trading Bot — Presentation Script (Updated)
+雙語簡報逐字稿（英文正式發表 / 中文意思對照）
+
+Total slides: 32  |  Total time: ~25 minutes
+格式：英文 = 實際說出口的話  |  中文 = 意思對照
+
+========================================================
+SPEAKER 1 — Introduction & Foundations
+第一位講者 — 簡介與基礎知識
+Blue slides | 負責藍色投影片
+Slides: Title, Why We Built This, Futures 101, Scope,
+        Six Strategies, Indicators, New Strategies,
+        Advanced Techniques, Evolution Timeline
+========================================================
+
+[SLIDE 1 — Title]
+
+"Good morning / afternoon everyone. We are Group [X], and today we will walk you through the algorithmic trading bot we built and tested on BingX perpetual futures."
+（大家好，我們是第 X 組，今天我們要介紹我們在 BingX 永續期貨上建立並測試的演算法交易機器人。）
+
+"Over seven months of backtesting — from November 2024 to May 2025 — we ran six different trading strategies across five cryptocurrencies, with a fully modelled cost structure including fees, funding rates, and 20x leverage."
+（在七個月的回測期間——從 2024 年 11 月到 2025 年 5 月——我們在五種加密貨幣上運行了六種不同的交易策略，包含完整的費用模型，包括手續費、資金費率和 20 倍槓桿。）
+
+"We are going to answer one honest question: do common technical strategies actually work on crypto futures once you properly account for every cost?"
+（我們要回答一個誠實的問題：當你把每一項費用都考慮進去之後，常見的技術分析策略真的能在加密期貨上賺錢嗎？）
+
+---
+
+[SLIDE 2 — Why We Built This]
+
+"Why choose this project? Three reasons."
+（為什麼選擇這個專案？三個原因。）
+
+"First: crypto never sleeps. Markets run 24/7. A human cannot watch five coins around the clock, but a bot can. Missed entries at 3am are gone forever."
+（第一：加密貨幣永不休眠。市場全天候運行。人類無法全天候盯著五種幣，但機器人可以。凌晨 3 點的進場機會一旦錯過就消失了。）
+
+"Second: emotions destroy trading performance. Fear causes you to cut winners early. Greed causes you to hold losers too long. An algorithm follows rules with zero emotion, every single time."
+（第二：情緒會毀掉交易表現。恐懼讓你太早獲利了結。貪婪讓你持有虧損倉位太久。演算法每次都嚴格遵守規則，沒有任何情緒。）
+
+"Third, and most important for us as engineering students: this project forced us to understand money at a structural level — not just price charts, but risk management, position sizing, and the true cost of every trade. That is worth more than any exam."
+（第三，對我們工程系學生來說最重要的是：這個專案迫使我們從結構層面理解金融——不只是價格圖，還有風險管理、倉位控制，以及每筆交易的真實成本。這比任何考試都更有價值。）
+
+---
+
+[SLIDE 3 — Perpetual Futures 101]
+
+"Before the strategies: what is a perpetual future, and why does it change everything about costs?"
+（在講策略之前：什麼是永續期貨，它為什麼會徹底改變費用結構？）
+
+"A perpetual future is a contract — you never own the actual coin. You are simply betting on whether the price goes up or down. The key difference from spot trading: you can use leverage. We used 20x, meaning we control twenty dollars of position for every one dollar of our own capital."
+（永續期貨是一種合約——你從來不擁有實際的幣。你只是在賭價格漲或跌。與現貨交易的關鍵區別：你可以使用槓桿。我們使用 20 倍槓桿，意味著每 1 美元的本金控制 20 美元的倉位。）
+
+"You can go LONG if you expect prices to rise, or SHORT if you expect them to fall. Both directions are available."
+（如果你預期價格上漲就做多，如果預期下跌就做空。兩個方向都可以交易。）
+
+"Now here is the cost problem. Opening and closing one trade costs 0.10% of the notional value in taker fees. With 20x leverage, that is 2% of your actual capital — just to get in and out. Plus a funding rate of 0.01% every 8 hours. A strategy that makes many short trades is simply paying fees to the exchange."
+（現在是費用問題。開倉和平倉一次要支付名義金額 0.10% 的吃單手續費。在 20 倍槓桿下，這是你實際本金的 2%——僅僅是進出一次。加上每 8 小時 0.01% 的資金費率。頻繁交易的策略基本上就是在替交易所打工。）
+
+---
+
+[SLIDE 4 — Project Scope]
+
+"What exactly did we build?"
+（我們到底建了什麼？）
+
+"Six automated strategies. Five crypto pairs — BTC, ETH, SOL, BNB, XRP. One-hour candles. 20x leverage. A realistic backtest engine that simulates every fee and every funding payment. And an interactive HTML report you can open in any browser."
+（六個自動化策略。五種加密貨幣——BTC、ETH、SOL、BNB、XRP。一小時K棒。20 倍槓桿。一個模擬每項費用和每次資金費率支付的真實回測引擎。以及可在任何瀏覽器打開的互動式 HTML 報告。）
+
+"What we deliberately left out: real money. All live testing used BingX VST — Virtual Simulation Trading — real API calls, real market data, but zero financial risk."
+（我們刻意排除的是：真實資金。所有即時測試都使用 BingX VST——虛擬模擬交易——真實 API 調用、真實市場數據，但零財務風險。）
+
+---
+
+[SLIDE 5 — Six Strategies, Six Philosophies]
+
+"Our six strategies each represent a different philosophy about how markets work."
+（我們的六種策略各自代表一種對市場運作的不同理解。）
+
+"EMA Cross: follow the momentum. When the fast average crosses the slow average, a trend has begun. MACD Cross: confirm before you commit — two indicators must agree."
+（EMA 交叉：追隨動量。當快速均線穿越慢速均線，趨勢已開始。MACD 交叉：進場前先確認——兩個指標必須一致。）
+
+"Bollinger Bands: the market oscillates. Buy when statistically cheap, sell when statistically expensive. SR Breakout: wait for structure — let price break a real support or resistance level, then enter."
+（布林帶：市場會震盪。在統計上便宜時買入，昂貴時賣出。S/R 突破：等待結構——讓價格突破真正的支撐或阻力，再進場。）
+
+"BB Squeeze: catch the explosion. When volatility compresses to a minimum, a big move is coming — enter the moment it fires. EMA Pullback: enter at value, not at exhaustion. Wait for a pullback to EMA-21 in a confirmed trend, and buy when buyers defend that level."
+（BB Squeeze：捕捉爆發。當波動性壓縮到最低點，大行情就要來了——在它啟動的瞬間進場。EMA 回調：在價值點進場，而非在頂部追高。在確認的趨勢中等待價格回調到 EMA-21，當買家在那個位置守住時進場。）
+
+---
+
+[SLIDE 6 — What Are These Indicators?]
+
+"Let me take ninety seconds to explain the core indicators so the rest of the results make sense."
+（讓我用 90 秒解釋核心指標，這樣接下來的結果才容易理解。）
+
+"EMA — Exponential Moving Average. A smoothed price line that gives more weight to recent candles. When price is above EMA, we are in an uptrend. When a fast EMA crosses a slow EMA, a momentum shift is happening."
+（EMA——指數移動平均線。一條給近期K棒更大權重的平滑價格線。當價格在 EMA 上方，我們處於上升趨勢。當快速 EMA 穿越慢速 EMA，動量正在轉換。）
+
+"MACD measures the gap between two EMAs. When the gap is growing, momentum is accelerating. When the histogram flips sign, momentum has reversed."
+（MACD 測量兩條 EMA 之間的差距。當差距擴大，動量在加速。當柱狀圖改變正負號，動量已反轉。）
+
+"Bollinger Bands draw two statistical lines — two standard deviations above and below a 20-period average. When price touches the lower band, it is statistically unusual — the market is stretched. RSI below 35 confirms: momentum is also stretched downward. Two confirmations means higher probability."
+（布林帶繪製兩條統計線——20 期平均線上下各兩個標準差。當價格觸及下軌，在統計上是不尋常的——市場被拉伸了。RSI 低於 35 確認：動量也在向下拉伸。兩個確認意味著更高的概率。）
+
+"ATR — Average True Range — measures how many dollars a coin typically moves per candle. BTC moves around $400 per hour candle. XRP moves about $0.004. We use ATR to size stop losses so they adapt to each coin's actual volatility — no fixed percentages."
+（ATR——真實波幅均值——衡量一種幣每根K棒通常移動多少美元。BTC 每根小時K棒移動約 400 美元。XRP 大約移動 0.004 美元。我們用 ATR 來設定止損大小，使其適應每種幣的實際波動性——不使用固定百分比。）
+
+---
+
+[SLIDE 7 — Why We Added Two More Strategies Mid-Project]
+
+"After the first round of backtesting, we added two new strategies because the original four had a shared weakness: they all entered at crossovers — random points mid-trend."
+（第一輪回測後，我們新增了兩個策略，因為原有的四個策略有一個共同弱點：它們都在交叉點進場——趨勢中間的隨機位置。）
+
+"BB Squeeze solves a different problem: when markets compress into tight ranges, they are storing energy. The Bollinger Band width hitting a 30-bar minimum tells us the coil is tightest right now. When width expands again — the coil releases. We enter the first expansion candle, confirmed by MACD direction."
+（BB Squeeze 解決了一個不同的問題：當市場壓縮成緊密區間時，它們在儲存能量。布林帶寬度達到 30 根K棒的最低點告訴我們彈簧現在壓得最緊。當寬度再次擴大——彈簧釋放。我們在第一根擴張K棒進場，由 MACD 方向確認。）
+
+"EMA Pullback solves the chasing problem. Instead of buying when EMA-9 crosses EMA-21 — which is often at the top of a mini-move — we wait for the pullback to EMA-21 itself. Then we require three things: ADX above 22 confirms a real trend, the candle low touches EMA-21, and the candle closes back above EMA-21 with a bullish body. That closing candle is proof that buyers stepped in at exactly that support level."
+（EMA Pullback 解決了追價問題。不是在 EMA-9 穿越 EMA-21 時買入——那通常是在小幅波動的頂部——而是等待回調到 EMA-21 本身。然後我們需要三個條件：ADX 高於 22 確認真正的趨勢，K棒低點觸及 EMA-21，以及K棒以陽線收盤並收回 EMA-21 上方。那根收盤K棒是買家在那個支撐位入場的證明。）
+
+---
+
+[SLIDE 8 — Three Techniques That Changed the Results]
+
+"In the second round of upgrades, we added three techniques that did more to improve results than any new strategy."
+（在第二輪升級中，我們加入了三項技術，它們對結果的改善超過了任何新策略。）
+
+"ADX — Average Directional Index. It measures trend strength from 0 to 100, direction-neutral. ADX above 22 means the market is trending — use EMA or MACD. ADX below 20 means the market is ranging and choppy — use BB or BB Squeeze. ADX between 20 and 22 is ambiguous — skip the trade entirely. This gate alone prevented hundreds of wrong-regime entries."
+（ADX——平均方向指數。它衡量 0 到 100 的趨勢強度，與方向無關。ADX 高於 22 表示市場在趨勢中——使用 EMA 或 MACD。ADX 低於 20 表示市場在盤整——使用 BB 或 BB Squeeze。ADX 在 20 到 22 之間是模糊的——完全跳過這筆交易。這個門控單獨阻止了數百次錯誤市場狀態下的進場。）
+
+"Chandelier Exit: a trailing stop that can only move in the profitable direction. Formula: stop equals peak price minus 2.5 times ATR. As the price climbs, the stop ratchets up. When price drops to the stop, the trade closes. You never give back a large gain — the stop is always anchored to the highest point reached."
+（Chandelier Exit：一個只能向獲利方向移動的跟蹤止損。公式：止損等於最高價減去 2.5 倍 ATR。隨著價格攀升，止損向上棘輪。當價格跌至止損，交易平倉。你永遠不會還回大筆收益——止損始終錨定在到達過的最高點。）
+
+"Two-Stage Exit: instead of binary all-or-nothing outcomes, we split the trade. Fifty percent exits at plus 2R, immediately locking profit and moving the stop to breakeven. The remaining half uses Chandelier Exit to chase the full move. Worst case after stage one: you break even on the second half. Best case: you ride a 5R or 8R move with half your position still on."
+（二段式出場：不是全有或全無的二元結果，我們把交易分割。50% 在 +2R 出場，立即鎖定利潤並將止損移至保本。另一半使用 Chandelier Exit 追逐完整行情。第一階段後的最壞情況：你在第二半保本。最好情況：你用一半倉位騎完 5R 或 8R 的行情。）
+
+---
+
+[SLIDE 9 — How Our Strategy Evolved — Version by Version]
+
+"Let me show you the full evolution so you can see exactly what each upgrade added."
+（讓我展示完整的進化過程，這樣你就能清楚看到每次升級帶來了什麼。）
+
+"Version one: 15-minute candles, basic EMA and MACD crossovers, fixed percentage stop losses. Win rate 20 to 28 percent. Returns negative 10 to negative 27 percent. Total fee drag up to 27 percent of equity. The market was simply eating us alive with costs."
+（第一版：15 分鐘K棒，基本 EMA 和 MACD 交叉，固定百分比止損。勝率 20 到 28%。回報負 10 到負 27%。總費用拖累高達資金的 27%。市場正在用費用把我們活吞。）
+
+"Version two: switch to 1-hour candles, add ATR stop, ADX regime gate, 4-hour multi-timeframe confirmation, session filter for weekdays only, and two-stage exit. Win rate jumped to 39 to 45 percent. Best single result: ETH EMA plus 9.28 percent in the bear period. Average costs dropped to 4 to 8 percent."
+（第二版：切換到 1 小時K棒，新增 ATR 止損、ADX 市場狀態門控、4 小時多時框確認、僅工作日的時段過濾器，以及二段式出場。勝率跳升到 39 到 45%。最佳單一結果：ETH EMA 在熊市期間正 9.28%。平均費用降至 4 到 8%。）
+
+"Version two-b: add BB Squeeze and EMA Pullback strategies, extend to a 7-month full cycle window. Top result: BNB BB plus 11.92 percent over seven months, both directions. XRP BB Squeeze plus 11.37 percent."
+（第二版 b：新增 BB Squeeze 和 EMA Pullback 策略，延伸至 7 個月完整週期視窗。最佳結果：BNB BB 在七個月雙向交易正 11.92%。XRP BB Squeeze 正 11.37%。）
+
+"Version three: add directional bias — long-only for coins in uptrends, short-only for coins in downtrends. This single filter was the biggest upgrade of the entire project. SOL SR plus MACD short-only: plus 19.61 percent, drawdown only 2.4 percent. XRP BB Squeeze long-only: plus 11.60 percent, drawdown only 2.2 percent."
+（第三版：新增方向性偏向——上升趨勢的幣只做多，下降趨勢的幣只做空。這個單一過濾器是整個專案最大的升級。SOL SR+MACD 純做空：正 19.61%，最大回撤只有 2.4%。XRP BB Squeeze 純做多：正 11.60%，最大回撤只有 2.2%。）
+
+"The lesson: direction bias cost nothing to implement — no new indicators, no new code — but it was worth 22 percentage points."
+（教訓：方向性偏向的實施成本為零——不需要新指標，不需要新代碼——但它的價值是 22 個百分點。）
+
+---
+---
+
+========================================================
+SPEAKER 2 — Architecture & Trade Logic
+第二位講者 — 系統架構與下單邏輯
+Green slides | 負責綠色投影片
+Slides: Signal Architecture, Components, Position Sizing,
+        Cost Model, Risk Controls
+========================================================
+
+[SLIDE 10 — Two Ways to Generate Signals]
+
+"Thank you. I will explain the technical architecture — how a candle becomes an order."
+（謝謝。我來解釋技術架構——一根K棒是如何變成一筆訂單的。）
+
+"We implemented two signal paths. Path A: TradingView sends an alert via webhook to a Google Cloud Run endpoint, which queues the signal to Pub/Sub, which our bot pulls and executes. Path B — what we actually use — is fully self-contained: the bot fetches candles directly from the BingX API, runs all indicator math locally, generates the signal, and places the order. No cloud needed. One Python command."
+（我們實現了兩種信號路徑。路徑 A：TradingView 通過 webhook 發送警報到 Google Cloud Run 端點，將信號排隊到 Pub/Sub，我們的機器人拉取並執行。路徑 B——我們實際使用的——完全自包含：機器人直接從 BingX API 獲取K棒，在本地運行所有指標計算，生成信號，並下單。不需要雲服務。一個 Python 指令。）
+
+---
+
+[SLIDE 11 — Key Components]
+
+"The system has seven components, all cleanly separated."
+（系統有七個組件，全部清晰分離。）
+
+"Strategies in src/strategies: six independent Python classes, one per strategy. Each receives candle data and returns exactly one signal — Long, Short, or Flat. Exchange client in src/exchange.py: wraps the BingX API. Backtest engine in src/backtest.py: replays history with full fee simulation. Risk manager: circuit breaker, daily loss cap at minus 5 percent, max 7 open positions. Trade journal: logs every trade to CSV. Bot runner: orchestrates the loop. S/R detector: identifies pivot-based support and resistance zones for the breakout strategy."
+（策略在 src/strategies 中：六個獨立的 Python 類，每個策略一個。每個接收K棒數據並返回確切一個信號——做多、做空或觀望。交易所客戶端在 src/exchange.py：封裝 BingX API。回測引擎在 src/backtest.py：重放歷史數據並完整模擬費用。風險管理器：斷路器，每日虧損上限負 5%，最多 7 個開倉。交易日誌：將每筆交易記錄到 CSV。機器人運行器：協調循環。S/R 檢測器：識別基於樞軸的支撐和阻力區域。）
+
+---
+
+[SLIDE 12 — Position Sizing]
+
+"How do we decide how large a position to take? This is where most retail traders make their biggest mistake."
+（我們如何決定倉位大小？這是大多數散戶犯最大錯誤的地方。）
+
+"Our rule: risk exactly 1 percent of current equity per trade. No more, no exceptions. With $10,000 equity, that is $100 of risk per trade."
+（我們的規則：每筆交易精確冒當前資金的 1%。不多，沒有例外。10,000 美元資金，每筆交易的風險是 100 美元。）
+
+"The formula: position size equals risk amount divided by stop loss distance. If the stop is 0.5 percent away, position notional equals $100 divided by 0.5 percent equals $20,000. With 20x leverage, that uses $1,000 of actual margin — 10 percent of equity. The effective leverage is 2x, far below the 20x cap."
+（公式：倉位大小等於風險金額除以止損距離。如果止損在 0.5% 之外，名義倉位等於 100 美元除以 0.5% 等於 20,000 美元。在 20 倍槓桿下，這使用了 1,000 美元的實際保證金——資金的 10%。有效槓桿是 2 倍，遠低於 20 倍上限。）
+
+"Critical insight: with risk-based sizing, if I lose 10 consecutive trades, I lose only 10 percent of my account. I cannot blow up."
+（關鍵洞察：使用風險比例倉位管理，如果我連輸 10 筆，我只損失 10% 的賬戶。我不可能爆倉。）
+
+"We also added volatility-adjusted sizing: when ATR-percent is above 1.5 times its own 50-bar rolling mean — meaning the market is unusually volatile right now — we automatically halve the position. Normal risk when calm; automatic de-risk during spikes."
+（我們還加入了波動性調整倉位：當 ATR 百分比超過其自身 50 根K棒滾動均值的 1.5 倍——意味著市場現在異常波動——我們自動將倉位減半。平靜時正常風險；波動峰值時自動降低風險。）
+
+---
+
+[SLIDE 13 — Cost Model]
+
+"Before any strategy makes money, it has to survive two types of costs."
+（在任何策略賺錢之前，它必須先承受兩種費用。）
+
+"Taker fee: 0.05 percent per side on notional. Open plus close equals 0.10 percent round trip. With 20x leverage, that is 2 percent of capital per trade. If a strategy takes 50 trades in 2 months, fees alone consume 10 to 15 percent of equity before a single profitable dollar."
+（吃單費：名義金額每側 0.05%。開倉加平倉等於 0.10% 的來回。在 20 倍槓桿下，每筆交易是本金的 2%。如果一個策略在 2 個月內進行 50 筆交易，僅費用就在賺到任何利潤之前消耗了 10 到 15% 的資金。）
+
+"Funding rate: 0.01 percent of notional every 8 hours. This is charged or received depending on market direction. For long positions in a bull market, you typically pay. For short positions, you may receive. We model this precisely for every trade."
+（資金費率：每 8 小時名義金額的 0.01%。根據市場方向收取或支付。在牛市中的多頭倉位，你通常支付。做空倉位，你可能收取。我們對每筆交易精確模擬這一點。）
+
+"This cost structure is why our 7-month results show such a large gap between the best and worst strategies. It is not just about win rate — it is about how many trades you take to get those wins."
+（這種費用結構解釋了為什麼我們的 7 個月結果在最佳和最差策略之間有如此大的差距。這不只是關於勝率——也關於你需要多少筆交易才能獲得這些勝利。）
+
+---
+
+[SLIDE 14 — Risk Controls & API Security]
+
+"Three layers of protection, both financial and technical."
+（三層保護，包括財務和技術兩方面。）
+
+"Financial: one percent max risk per trade. Daily circuit breaker halts all new trades if daily loss reaches minus 5 percent. Maximum 7 open positions simultaneously across all symbols."
+（財務方面：每筆交易最大風險 1%。如果每日損失達到負 5%，每日斷路器停止所有新交易。所有幣種同時最多 7 個開倉。）
+
+"Technical: API keys stored in a dot-env file, never committed to GitHub. Permissions on BingX API key: Read and Perpetual Futures Trading only. Withdrawals and transfers explicitly disabled — even if someone steals the key, they cannot touch the funds."
+（技術方面：API 密鑰存儲在 .env 文件中，永不提交到 GitHub。BingX API 密鑰權限：僅讀取和永續期貨交易。明確禁用提款和轉帳——即使有人竊取密鑰，他們也無法動用資金。）
+
+"All live bot testing used BingX VST — Virtual Simulation Trading. Real API calls, real order book, real fills — but simulated balances. Zero financial risk."
+（所有即時機器人測試都使用 BingX VST——虛擬模擬交易。真實 API 調用、真實訂單簿、真實成交——但模擬餘額。零財務風險。）
+
+"Now Speaker 3 will walk through every strategy result in detail."
+（現在第三位講者將詳細介紹每個策略結果。）
+
+---
+---
+
+========================================================
+SPEAKER 3 — Backtest Results & Analysis
+第三位講者 — 回測結果與分析
+Orange slides | 負責橙色投影片
+Slides: Setup, 6 strategies, Bear, Bull, Regime, Techniques,
+        7-Month, $100 Simulation, 3 Keys to Profitability
+========================================================
+
+[SLIDE 15 — Backtest Setup]
+
+"Thanks. I am going to show results across three test windows: bear market, bull market, and a 7-month full cycle."
+（謝謝。我將展示三個測試窗口的結果：熊市、牛市和 7 個月完整週期。）
+
+"Setup: 5 symbols, 1-hour candles, 20x leverage, 0.05 percent taker fee per side, 0.01 percent funding every 8 hours, 1 percent equity risk per trade. Two market periods: bear from April to May 2025, 45 days. Bull from November to December 2024, BTC ran from 67,000 to 100,000 dollars — 45 days. Full cycle: November 2024 to May 2025, 7 months, 4,000 candles."
+（設置：5 種幣，1 小時K棒，20 倍槓桿，每側 0.05% 吃單費，每 8 小時 0.01% 資金費率，每筆交易 1% 資金風險。兩個市場時期：熊市從 2025 年 4 月到 5 月，45 天。牛市從 2024 年 11 月到 12 月，BTC 從 67,000 美元漲到 100,000 美元——45 天。完整週期：2024 年 11 月到 2025 年 5 月，7 個月，4,000 根K棒。）
+
+"All strategies use: two-stage exit with Chandelier trailing, ADX regime gate, volatility-adjusted position sizing, and EMA-200 macro filter."
+（所有策略都使用：帶有 Chandelier 跟蹤的二段式出場、ADX 市場狀態門控、波動性調整倉位，以及 EMA-200 宏觀過濾器。）
+
+---
+
+[SLIDE 16 — Strategy 1: EMA Cross]
+
+"EMA Cross plus trend filter plus RSI. Bear market average across 5 symbols: minus 3.36 percent. Long-only in bull: plus 5.53 percent on BTC, plus 7.24 percent on BTC Bollinger. Over 7 months, XRP EMA long-only finished positive."
+（EMA 交叉加趨勢過濾加 RSI。熊市 5 種幣的平均：負 3.36%。牛市只做多：BTC 正 5.53%，BTC 布林帶正 7.24%。在 7 個月中，XRP EMA 純做多最終為正。）
+
+"Why negative on average? In a mixed market trading both directions, the longs and shorts cancel each other out — the fees remain. Lesson: EMA Cross needs a clear macro direction to work."
+（為什麼平均為負？在雙向交易的混合市場中，多單和空單互相抵消——費用卻不減。教訓：EMA 交叉需要明確的宏觀方向才能奏效。）
+
+---
+
+[SLIDE 17 — Strategy 2: MACD]
+
+"MACD plus trend filter plus RSI. Bear both-sides average: minus 2.18 percent. 7-month XRP long-only: plus 4.18 percent. XRP MACD has 44 to 46 percent win rate consistently — one of our more reliable signal generators."
+（MACD 加趨勢過濾加 RSI。熊市雙向平均：負 2.18%。7 個月 XRP 純做多：正 4.18%。XRP MACD 的勝率穩定在 44 到 46%——是我們較可靠的信號產生器之一。）
+
+"Key observation: MACD plus session filter — entries only 8am to 8pm UTC, weekdays only — significantly reduced the total trade count without hurting win rate. Fewer trades means fewer fees. This improved average returns by roughly 2 percentage points versus unfiltered MACD."
+（關鍵觀察：MACD 加時段過濾——僅在 UTC 上午 8 點到晚上 8 點、僅工作日進場——在不損害勝率的情況下顯著減少了總交易次數。更少的交易意味著更少的費用。這使平均回報比未過濾的 MACD 提高了約 2 個百分點。）
+
+---
+
+[SLIDE 18 — Strategy 3: Bollinger Bands]
+
+"Bollinger Bands plus RSI double confirmation. This is our most consistent performer across different market conditions."
+（布林帶加 RSI 雙重確認。這是我們在不同市場條件下表現最穩定的策略。）
+
+"Bear market average both-sides: plus 0.34 percent — the first near-positive average result. Bull market long-only average: plus 4.57 percent. 7-month full cycle: BNB BB both-sides plus 11.92 percent. BNB BB short-only plus 14.45 percent."
+（熊市雙向平均：正 0.34%——第一個接近正值的平均結果。牛市純做多平均：正 4.57%。7 個月完整週期：BNB BB 雙向正 11.92%。BNB BB 純做空正 14.45%。）
+
+"The key upgrade that unlocked this result: ADX regime gate. Bollinger Bands only fire when ADX is below 20 — confirmed ranging market. This eliminated all the false entries where BB touched the band in a trending market and the price just kept going."
+（解鎖這一結果的關鍵升級：ADX 市場狀態門控。布林帶只在 ADX 低於 20 時觸發——確認的盤整市場。這消除了所有在趨勢市場中 BB 觸及帶邊但價格繼續前進的假信號進場。）
+
+---
+
+[SLIDE 19 — Strategy 4: SR Breakout]
+
+"S/R Breakout plus MACD confirmation. Bear both-sides average: minus 3.14 percent. But with direction filter: bear short-only average plus 1.92 percent. And the standout: SOL SR plus MACD short-only over 7 months: plus 19.61 percent, 55 percent win rate, max drawdown only 2.4 percent."
+（S/R 突破加 MACD 確認。熊市雙向平均：負 3.14%。但加入方向過濾器後：熊市純做空平均正 1.92%。最突出的：SOL SR+MACD 在 7 個月純做空：正 19.61%，55% 勝率，最大回撤僅 2.4%。）
+
+"S/R logic identifies where the market has previously reversed — price memory — and waits for a decisive break. MACD confirmation means we only enter when momentum is also in our direction. The structure-based stop — placed 1 ATR below the broken level — gives the trade a logical invalidation point, not an arbitrary one."
+（S/R 邏輯識別市場之前反轉的位置——價格記憶——並等待決定性的突破。MACD 確認意味著我們只在動量也在我們方向時進場。基於結構的止損——設在突破水平下方 1 倍 ATR——給交易一個有邏輯的失效點，而不是任意的。）
+
+---
+
+[SLIDE 20 — Strategy 5: Adaptive Regime-Switching]
+
+"The Adaptive strategy was our most ambitious attempt: automatically detect whether the market is trending or ranging, and switch strategies accordingly."
+（自適應策略是我們最雄心勃勃的嘗試：自動檢測市場是在趨勢還是盤整，並相應切換策略。）
+
+"Eight simultaneous filters: ADX regime gate, EMA-200 macro gate with 0.5 percent buffer, 4-hour multi-timeframe confirmation, session filter, volume filter, volatility-adjusted sizing, two-stage exit, and time exit after 24 bars."
+（八個同時運作的過濾器：ADX 市場狀態門控、帶有 0.5% 緩衝的 EMA-200 宏觀門控、4 小時多時框確認、時段過濾器、成交量過濾器、波動性調整倉位、二段式出場，以及 24 根K棒後的時間出場。）
+
+"Result: 0 to 3 trades per symbol — extremely selective. Average cost under 2 percent. The architecture is correct, but with 8 simultaneous filters, the strategy rarely fires. This demonstrates the quality-versus-frequency tradeoff. Threshold tuning would unlock more trades without sacrificing the logic."
+（結果：每個幣種 0 到 3 筆交易——極度選擇性。平均費用低於 2%。架構是正確的，但有 8 個同時運作的過濾器，策略很少觸發。這展示了質量與頻率的權衡。閾值調整可以在不犧牲邏輯的情況下解鎖更多交易。）
+
+---
+
+[SLIDE 21 — Bear Market Results]
+
+"Summarizing the bear period — April to May 2025, both sides, two-stage exit plus Chandelier."
+（總結熊市時期——2025 年 4 月到 5 月，雙向，二段式出場加 Chandelier。）
+
+"BB plus RSI: plus 0.34 percent average — the only near-positive strategy both-sides in bear. ADX ranging gate worked perfectly. SR plus MACD short-only: plus 1.92 percent average — best bear strategy with direction filter. BTC SR short-only alone hit plus 12.79 percent."
+（BB 加 RSI：平均正 0.34%——熊市中唯一接近正值的雙向策略。ADX 盤整門控完美運作。SR+MACD 純做空：平均正 1.92%——加方向過濾器後熊市最佳策略。僅 BTC SR 純做空就達到正 12.79%。）
+
+"All other strategies negative in bear both-sides — confirming that trading both directions in a clear downtrend is counterproductive."
+（所有其他策略在熊市雙向交易中為負——確認在明確下降趨勢中雙向交易適得其反。）
+
+---
+
+[SLIDE 22 — Bull Market Results]
+
+"Bull period — November to December 2024. BTC ran from 67k to 100k."
+（牛市時期——2024 年 11 月到 12 月。BTC 從 67,000 漲到 100,000 美元。）
+
+"Long-only filters unlocked the bull market gains. BTC BB long-only: plus 7.24 percent. BTC EMA long-only: plus 5.53 percent. ETH SR plus MACD long-only: plus 5.20 percent."
+（純做多過濾器解鎖了牛市收益。BTC BB 純做多：正 7.24%。BTC EMA 純做多：正 5.53%。ETH SR+MACD 純做多：正 5.20%。）
+
+"Strategies run unfiltered — both directions — in bull market mostly negative. MACD both-sides minus 11.70 percent on average. The short signals in a bull trend are pure noise — they just add losses."
+（在牛市中未過濾雙向運行的策略大多為負。MACD 雙向平均負 11.70%。牛市中的空頭信號純粹是噪音——它們只是增加虧損。）
+
+---
+
+[SLIDE 23 — What If We Only Trade With the Trend?]
+
+"Now the most important table in this presentation."
+（現在是這個簡報中最重要的表格。）
+
+"BB bull long-only: plus 4.57 percent average. Same BB bear both-sides: plus 0.34 percent. Same BB bear short-only: plus 0.73 percent. The ADX gate turns BB consistently positive in both regimes when paired with direction."
+（BB 牛市純做多：平均正 4.57%。同樣的 BB 熊市雙向：正 0.34%。同樣的 BB 熊市純做空：正 0.73%。ADX 門控與方向結合後，使 BB 在兩種市場狀態下持續為正。）
+
+"SR plus MACD bear short-only: plus 1.92 percent. Same strategy bear both-sides: minus 3.14 percent. The difference is the direction filter — that is five percentage points from one rule."
+（SR+MACD 熊市純做空：正 1.92%。同樣策略熊市雙向：負 3.14%。差異在於方向過濾器——一條規則帶來五個百分點的差距。）
+
+---
+
+[SLIDE 24 — What Changed: 6 Upgraded Techniques]
+
+"Let me quickly recap all six upgrades that drove this improvement."
+（讓我快速回顧推動這些改進的六項升級。）
+
+"One: two-stage exit plus Chandelier — locks 50 percent profit at plus-2R, trails the rest. Two: ADX regime gate — right strategy for the right market. Three: 4-hour MTF — 1H signals must agree with the 4H trend. Four: session filter — MACD only during 8am to 8pm UTC weekdays. Five: volatility-adjusted sizing — half position when ATR spike detected. Six: EMA-200 buffer — no trades within 0.5 percent of the 200 EMA."
+（一：二段式出場加 Chandelier——在 +2R 鎖定 50% 利潤，跟蹤剩餘部分。二：ADX 市場狀態門控——為正確的市場使用正確的策略。三：4 小時多時框——1H 信號必須與 4H 趨勢一致。四：時段過濾器——MACD 僅在 UTC 工作日上午 8 點到晚上 8 點。五：波動性調整倉位——檢測到 ATR 峰值時倉位減半。六：EMA-200 緩衝——不在 200 EMA 的 0.5% 範圍內交易。）
+
+"Combined: win rates from 20 percent to 39 to 56 percent. Fee drag from 10 to 27 percent down to 1.5 to 8 percent."
+（合計：勝率從 20% 提升到 39 到 56%。費用拖累從 10 到 27% 降至 1.5 到 8%。）
+
+---
+
+[SLIDE 25 — 7-Month Full Cycle Results]
+
+"Now the 7-month view — 4,000 candles, November 2024 to May 2025."
+（現在是 7 個月的全景——4,000 根K棒，2024 年 11 月到 2025 年 5 月。）
+
+"Both-sides unfiltered, top performers: BNB BB plus RSI plus 11.92 percent, 45 percent win rate, 93 trades. XRP BB Squeeze plus 11.37 percent, 50 percent win rate, 60 trades. XRP EMA Pullback plus 4.70 percent. XRP dominates the positive list both-sides — XRP was in a strong bull trend during this period."
+（雙向未過濾，表現最佳：BNB BB 加 RSI 正 11.92%，45% 勝率，93 筆交易。XRP BB Squeeze 正 11.37%，50% 勝率，60 筆交易。XRP EMA Pullback 正 4.70%。XRP 在雙向正值排行榜上佔主導地位——XRP 在此期間處於強勁牛市趨勢中。）
+
+"Direction-filtered top five: SOL SR plus MACD short-only plus 19.61 percent at 55 percent win rate. BNB BB plus RSI short-only plus 14.45 percent at 49 percent. XRP BB Squeeze long-only plus 11.60 percent at 56 percent win rate — only 34 trades — max drawdown 2.2 percent."
+（方向過濾後前五名：SOL SR+MACD 純做空正 19.61%，55% 勝率。BNB BB 加 RSI 純做空正 14.45%，49% 勝率。XRP BB Squeeze 純做多正 11.60%，56% 勝率——僅 34 筆交易——最大回撤 2.2%。）
+
+"Important: BTC, ETH, SOL mostly negative both-sides over 7 months. Coin selection matters as much as strategy selection."
+（重要：BTC、ETH、SOL 在 7 個月雙向交易中大多為負。幣種選擇與策略選擇同等重要。）
+
+---
+
+[SLIDE 26 — If You Started with $100]
+
+"Let us make this concrete. $100 starting capital, November 2024."
+（讓我們具體化。100 美元起始資金，2024 年 11 月。）
+
+"Best outcome: SOL SR plus MACD short-only. $100 becomes $119.61. Plus $19.61 over 7 months. Max drawdown 2.4 percent — the $100 barely dipped during the whole run."
+（最佳結果：SOL SR+MACD 純做空。100 美元變成 119.61 美元。7 個月增加 19.61 美元。最大回撤 2.4%——整個過程中 100 美元幾乎沒有下跌。）
+
+"Second: BNB BB plus RSI short-only. $100 becomes $114.45."
+（第二：BNB BB 加 RSI 純做空。100 美元變成 114.45 美元。）
+
+"Third: XRP BB Squeeze long-only. $100 becomes $111.60. Drawdown only 2.2 percent — this is the safest profitable strategy in this period."
+（第三：XRP BB Squeeze 純做多。100 美元變成 111.60 美元。回撤僅 2.2%——這是此期間最安全的盈利策略。）
+
+"Worst outcome: ETH MACD both-sides. $100 becomes $73.32. Minus $26.68. Same SOL SR plus MACD strategy both-sides: minus $2.63. Then short-only: plus $19.61. The same $22 dollar swing comes from one filter — direction."
+（最差結果：ETH MACD 雙向。100 美元變成 73.32 美元。虧損 26.68 美元。同樣的 SOL SR+MACD 策略雙向：虧損 2.63 美元。然後純做空：盈利 19.61 美元。同樣 22 美元的差距來自一個過濾器——方向。）
+
+"Annualized: SOL SR plus MACD short-only approximately 42 percent per year. BNB BB short-only approximately 31 percent per year. XRP BB Squeeze long-only approximately 25 percent per year. These scale linearly — $1,000 gives the same percentage returns."
+（年化：SOL SR+MACD 純做空約每年 42%。BNB BB 純做空約每年 31%。XRP BB Squeeze 純做多約每年 25%。這些線性縮放——1,000 美元給出相同的百分比回報。）
+
+---
+
+[SLIDE 27 — 3 Keys to Long-Term Profitability]
+
+"Seven months of backtesting taught us three keys. None is sufficient alone — all three must be present."
+（七個月的回測告訴了我們三個關鍵。任何一個單獨都不夠——三個必須同時存在。）
+
+"Key one: regime detection. ADX above 22 means a trending market — use EMA, MACD, or EMA Pullback. ADX below 20 means a ranging market — use BB or BB Squeeze. The ADX gate alone improved BB from random losses to consistently near-positive. Using the wrong strategy for the wrong market is the most common way to lose money in systematic trading."
+（第一個關鍵：市場狀態識別。ADX 高於 22 意味著趨勢市場——使用 EMA、MACD 或 EMA Pullback。ADX 低於 20 意味著盤整市場——使用 BB 或 BB Squeeze。ADX 門控單獨就將 BB 從隨機虧損改善為持續接近正值。在錯誤的市場中使用錯誤的策略是系統化交易中最常見的虧損方式。）
+
+"Key two: direction bias. Trade with the macro trend. Bull market — longs only. Bear market — shorts only. EMA-50 slope and EMA-200 tell you which is which. The same SOL SR plus MACD strategy was minus 2.63 percent both-sides and plus 19.61 percent short-only. That 22-point difference came from one rule. No new indicators."
+（第二個關鍵：方向性偏向。與宏觀趨勢同方向交易。牛市——只做多。熊市——只做空。EMA-50 斜率和 EMA-200 告訴你是哪種。同樣的 SOL SR+MACD 策略雙向是負 2.63%，純做空是正 19.61%。22 個百分點的差距來自一條規則。不需要新指標。）
+
+"Key three: exit mastery. The two-stage exit means even a medium outcome still locks profit. You can never fully lose the first stage's gains. Chandelier Exit means you never exit too early — it trails dynamically from the peak. XRP BB Squeeze long-only returned plus 11.60 percent with max drawdown of only 2.2 percent. That combination — good exit design — is why."
+（第三個關鍵：出場精通。二段式出場意味著即使是中等結果也能鎖定利潤。你永遠無法完全失去第一階段的收益。Chandelier Exit 意味著你永遠不會過早退出——它從峰值動態跟蹤。XRP BB Squeeze 純做多回報正 11.60%，最大回撤只有 2.2%。那個組合——良好的出場設計——就是原因。）
+
+"Formula: regime detection times direction bias times exit mastery equals consistent edge over time."
+（公式：市場狀態識別 × 方向性偏向 × 出場精通 = 持續的長期優勢。）
+
+---
+---
+
+========================================================
+SPEAKER 4 — Demo & Conclusions
+第四位講者 — 實機展示與結論
+Purple slides | 負責紫色投影片
+Slides: What We Learned, Demo, Limitations, Next Steps,
+        Conclusion
+========================================================
+
+[SLIDE 28 — What We Actually Learned]
+
+"Thank you. Let me share five things we learned from watching real data — not from theory."
+（謝謝。讓我分享我們從觀察真實數據中學到的五件事——不是來自理論。）
+
+"One: direction is the biggest lever. Not a new indicator, not a new strategy. Just knowing whether the market is going up or down and trading only with that direction. SOL minus 2.63 both-sides to plus 19.61 short-only."
+（一：方向是最大的槓桿。不是新指標，不是新策略。只是知道市場是漲還是跌，並只與那個方向一起交易。SOL 從雙向負 2.63% 到純做空正 19.61%。）
+
+"Two: exit design matters as much as entry. Two-stage exit locked profits. Chandelier trailed winners. Win rates improved from 20 to 28 percent all the way to 39 to 56 percent — timeframe upgrade plus exit design together."
+（二：出場設計與進場同等重要。二段式出場鎖定利潤。Chandelier 跟蹤贏家。勝率從 20 到 28% 提高到 39 到 56%——時框升級加出場設計共同作用。）
+
+"Three: coin selection matters as much as strategy. XRP BB Squeeze long-only plus 11.60 percent. Same BB Squeeze on ETH: minus 12.67 percent. Same strategy, different coin, completely different result. The coin's macro trend determined the outcome."
+（三：幣種選擇與策略選擇同等重要。XRP BB Squeeze 純做多正 11.60%。同樣的 BB Squeeze 在 ETH 上：負 12.67%。相同策略，不同幣種，完全不同的結果。幣種的宏觀趨勢決定了結果。）
+
+"Four: win rate alone tells you nothing. XRP BB Squeeze long-only: 56 percent win rate, positive. SOL SR plus MACD both-sides: 41 percent win rate, minus 2.63 percent. The win rate matters only in combination with reward-risk ratio and number of trades."
+（四：單獨的勝率什麼都說明不了。XRP BB Squeeze 純做多：56% 勝率，正值。SOL SR+MACD 雙向：41% 勝率，負 2.63%。勝率只有與報酬風險比和交易次數結合才有意義。）
+
+"Five: fewer trades is often better. XRP BB Squeeze long-only: 34 trades over 7 months, plus 11.60 percent. ETH MACD both-sides: 105 trades, minus 26.68 percent. More trades means more fees. The Adaptive strategy with 0 to 3 trades per symbol had the lowest cost of any strategy — the architecture is right, just needs more opportunities unlocked."
+（五：更少的交易往往更好。XRP BB Squeeze 純做多：7 個月 34 筆交易，正 11.60%。ETH MACD 雙向：105 筆交易，負 26.68%。更多交易意味著更多費用。每個幣種 0 到 3 筆交易的自適應策略費用最低——架構是對的，只是需要解鎖更多機會。）
+
+---
+
+[SLIDE 29 — Running the Bot — Live Demo]
+
+"Let me show the system running."
+（讓我展示系統運行。）
+
+"Single market scan — check all symbols once and output signals:"
+（單次市場掃描——檢查所有幣種一次並輸出信號：）
+
+    python -m src.bot
+
+"Continuous loop — re-scan every 15 minutes:"
+（連續循環——每 15 分鐘重新掃描：）
+
+    python -m src.bot --loop
+
+"Generate the 7-month backtest report:"
+（生成 7 個月回測報告：）
+
+    backtest_venv/bin/python -m scripts.run_backtest
+
+"Output: three HTML reports — both-sides, long-only, short-only. Each report has equity curves for all 30 strategy-symbol combinations, a return heatmap, and the complete trade log with entry time, exit reason, fees paid, and drawdown."
+（輸出：三個 HTML 報告——雙向、純做多、純做空。每個報告包含所有 30 個策略-幣種組合的資金曲線、回報熱力圖，以及包含進場時間、出場原因、費用和回撤的完整交易記錄。）
+
+---
+
+[SLIDE 30 — Limitations]
+
+"I want to be honest about what our backtest cannot tell us."
+（我想誠實說明我們的回測無法告訴我們什麼。）
+
+"One: 7 months is better than 15 days, but still not enough for statistical significance. A robust system needs multiple full market cycles — 3 to 5 years."
+（一：7 個月比 15 天好，但仍不足以達到統計顯著性。一個健壯的系統需要多個完整市場週期——3 到 5 年。）
+
+"Two: no slippage modelled. In real trading, large orders move the price. Our backtest assumes perfect execution at the candle close price."
+（二：未模擬滑點。在真實交易中，大訂單會影響價格。我們的回測假設在K棒收盤價完美執行。）
+
+"Three: funding rate assumed constant at 0.01 percent. Real BingX funding ranges from minus 0.03 to plus 0.10 percent per 8 hours."
+（三：資金費率假設固定在 0.01%。真實 BingX 資金費率範圍從每 8 小時負 0.03% 到正 0.10%。）
+
+"Four: overfitting risk. We tested these specific parameters on these specific dates. A different 7-month window might give different results."
+（四：過度擬合風險。我們在這些特定日期測試了這些特定參數。不同的 7 個月窗口可能給出不同結果。）
+
+"Five: correlation not managed. BTC and ETH tend to move together. Running both simultaneously doubles the real risk beyond what position sizing suggests."
+（五：未管理相關性。BTC 和 ETH 傾向於同向移動。同時運行兩者的實際風險是倉位管理建議的兩倍。）
+
+---
+
+[SLIDE 31 — What We'd Do Next]
+
+"Given more time, three things."
+（如果有更多時間，三件事。）
+
+"Already built: all six strategies, two-stage exit, ADX gate, 4H MTF, session filter, volatility sizing, EMA-200 buffer, 7-month backtest, interactive reports."
+（已建立：所有六個策略、二段式出場、ADX 門控、4H 多時框、時段過濾器、波動性倉位管理、EMA-200 緩衝、7 個月回測、互動式報告。）
+
+"Next sprint: tune the Adaptive strategy thresholds to allow more trades. Walk-forward validation — train on first 4 months, test on next 3 — to catch overfitting. Automate the directional bias detection instead of setting it manually."
+（下一個衝刺：調整自適應策略閾值以允許更多交易。前向驗證——在前 4 個月訓練，在接下來 3 個月測試——以發現過度擬合。自動化方向性偏向檢測而不是手動設置。）
+
+"Longer term: TradingView Pine Script integration via webhook for visual strategy building. Simple ML signal classifier to filter out low-probability setups before they are sent to the execution engine. Portfolio-level correlation limits."
+（長期：通過 webhook 集成 TradingView Pine Script，用於可視化策略構建。簡單的 ML 信號分類器，在低概率設置被發送到執行引擎之前將其過濾掉。投資組合級別的相關性限制。）
+
+---
+
+[SLIDE 32 — Conclusion]
+
+"Let me close with a direct answer to our original question."
+（讓我以對原始問題的直接回答作結。）
+
+"Do common technical strategies work on crypto futures after fees? The answer is: yes — but only with three conditions. Right regime. Right direction. Right exit design."
+（常見技術策略在扣費後能在加密期貨上盈利嗎？答案是：能——但只有在三個條件下。正確的市場狀態。正確的方向。正確的出場設計。）
+
+"Our evidence: SOL SR plus MACD short-only plus 19.61 percent over 7 months with 2.4 percent max drawdown. XRP BB Squeeze long-only plus 11.60 percent with 2.2 percent max drawdown. BNB BB plus RSI both-sides plus 11.92 percent. With $100 starting capital, the best strategy turned $100 into $119.61."
+（我們的證據：SOL SR+MACD 純做空在 7 個月正 19.61%，最大回撤 2.4%。XRP BB Squeeze 純做多正 11.60%，最大回撤 2.2%。BNB BB 加 RSI 雙向正 11.92%。以 100 美元起始資金，最佳策略將 100 美元變成 119.61 美元。）
+
+"Same strategies, wrong direction: ETH MACD minus 26.68 percent. $100 became $73.32. The difference is not the strategy — it is knowing which direction to trade."
+（同樣的策略，方向錯誤：ETH MACD 負 26.68%。100 美元變成 73.32 美元。差別不在策略——在於知道哪個方向交易。）
+
+"As traders, we have more to learn. As engineers, we built a production-quality system with real API integration, accurate fee modelling, and clean modular architecture. As students, we now understand why most retail traders lose: they ignore costs, they fight the trend, and they do not have an exit plan."
+（作為交易者，我們還有很多需要學習。作為工程師，我們建立了一個具有真實 API 集成、精確費用模型和乾淨模組化架構的生產質量系統。作為學生，我們現在理解了為什麼大多數散戶會虧損：他們忽視費用，他們對抗趨勢，他們沒有出場計劃。）
+
+"Thank you."
+（謝謝。）
+
+--
+---
+
+========================================================
+Q&A BACKUP ANSWERS  |  問答備用答案
+========================================================
+
+Q: Why BingX instead of Binance or Bybit?
+（為什麼選 BingX 而不是幣安或 Bybit？）
+
+"BingX offers VST — Virtual Simulation Trading — real API calls against simulated positions. Perfect for students: real market data, zero financial risk. Their perpetuals API is well-documented with a generous free tier."
+（BingX 提供 VST——虛擬模擬交易——對模擬倉位進行真實 API 調用。對學生來說非常完美：真實市場數據，零財務風險。他們的永續合約 API 文檔齊全，免費額度慷慨。）
+
+---
+
+Q: Could this make real money?
+（這能真的賺錢嗎？）
+
+"Three results suggest real edge: SOL SR plus MACD short-only at 55 percent win rate. XRP BB Squeeze long-only at 56 percent win rate with 2.2 percent drawdown. BNB BB plus RSI at 45 to 49 percent win rate over 7 months. But 7 months is one data point. We would want 2 years of walk-forward validation before trading real money — starting with very small positions and scaling up only after consistent positive performance."
+（三個結果表明有真正的優勢：SOL SR+MACD 純做空 55% 勝率。XRP BB Squeeze 純做多 56% 勝率，2.2% 回撤。BNB BB 加 RSI 在 7 個月 45 到 49% 勝率。但 7 個月只是一個數據點。在交易真實資金之前，我們希望有 2 年的前向驗證——從非常小的倉位開始，只有在持續正回報後才擴大規模。）
+
+---
+
+Q: Why does direction bias make such a huge difference?
+（為什麼方向性偏向有如此巨大的差異？）
+
+"In a bull market, most random entries will go long. In a bear market, most random entries will go short. If your strategy fires equally in both directions in a trending market, half of your trades are automatically fighting the trend. Those trades have lower win rates and get stopped out faster. Filtering to only the trend direction removes the worst half of your trade population while keeping the best half. The win rate naturally rises."
+（在牛市中，大多數隨機進場都會做多。在熊市中，大多數隨機進場都會做空。如果你的策略在趨勢市場中兩個方向都同等觸發，一半的交易自動在對抗趨勢。那些交易的勝率更低，止損更快被觸發。過濾只跟趨勢方向交易，消除了你交易群體中最差的一半，同時保留最好的一半。勝率自然上升。）
+
+---
+
+Q: What was the hardest bug to fix?
+（最難修復的錯誤是什麼？）
+
+"The S/R breakout entry condition was comparing entry price against resistance levels that were already below current price. Meaning: we were looking for a breakout above a level we had already passed. The condition could never be true. The strategy returned zero trades for days and we thought it was being correctly selective — but it was silently broken. The fix was one line, but finding it required hours of adding debug prints at each filter stage."
+（S/R 突破進場條件在比較進場價格與已經低於當前價格的阻力位。意思是：我們在尋找一個我們已經通過的水平的突破。條件永遠不可能為真。策略幾天內返回零交易，我們以為它在正確地選擇性——但它無聲地壞掉了。修復只需要一行，但找到它需要幾個小時在每個過濾階段添加調試打印。）
+
+---
+
+Q: What is the minimum capital to actually run this?
+（實際運行這個需要的最低資金是多少？）
+
+"The system uses 1 percent risk per trade with ATR-based position sizing. For XRP at around $2.50 with typical ATR of $0.04, a 1.5 ATR stop is $0.06 — 2.4 percent. With $100 equity, 1 percent risk is $1. Position notional: $1 divided by 2.4 percent equals about $42. With 20x leverage, margin needed is $2.10. BingX minimum order is about 5 USDT notional — so $100 is workable for XRP and BNB. For BTC and ETH, stops are wider and you would want at least $200 to $300 to stay above minimum order sizes."
+（系統使用基於 ATR 倉位管理每筆交易 1% 風險。XRP 約 2.50 美元，典型 ATR 0.04 美元，1.5 倍 ATR 止損是 0.06 美元——2.4%。100 美元資金，1% 風險是 1 美元。名義倉位：1 美元除以 2.4% 約等於 42 美元。在 20 倍槓桿下，需要保證金 2.10 美元。BingX 最小訂單約 5 USDT 名義——所以 100 美元對 XRP 和 BNB 是可行的。對 BTC 和 ETH，止損更寬，你需要至少 200 到 300 美元才能高於最小訂單大小。）
+
+---
+
+End of script  |  逐字稿結束
+Total slides: 32  |  Estimated time: 25–30 minutes
