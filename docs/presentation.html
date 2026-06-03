@@ -1,413 +1,978 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BingX Algo Trading Bot — Group Presentation</title>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#0d1117;color:#e0e6f0;height:100vh;overflow:hidden;user-select:none}
-#progress{position:fixed;top:0;left:0;height:3px;background:#3b82f6;transition:width .3s ease;z-index:200}
-#deck{width:100%;height:100vh}
-.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:56px 80px 72px;opacity:0;transition:opacity .25s ease}
-.slide.active{display:flex;opacity:1}
-.slide[data-s="1"]{border-left:5px solid #3b82f6}
-.slide[data-s="2"]{border-left:5px solid #10b981}
-.slide[data-s="3"]{border-left:5px solid #f59e0b}
-.slide[data-s="4"]{border-left:5px solid #8b5cf6}
-.slide[data-s="0"]{border-left:none;background:linear-gradient(135deg,#0f172a 0%,#1a2744 100%);align-items:center;text-align:center}
-.chip{display:inline-block;padding:3px 12px;border-radius:10px;font-size:.82rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
-[data-s="1"] .chip{background:#1e3a5f;color:#60a5fa}
-[data-s="2"] .chip{background:#064e3b;color:#34d399}
-[data-s="3"] .chip{background:#451a03;color:#fbbf24}
-[data-s="4"] .chip{background:#2e1065;color:#a78bfa}
-h1{font-size:2.2rem;font-weight:700;color:#f1f5f9;line-height:1.25;margin-bottom:20px}
-h2{font-size:1.3rem;font-weight:600;color:#94a3b8;margin-bottom:10px;margin-top:20px}
-p{color:#94a3b8;font-size:1.05rem;line-height:1.65;margin-top:10px}
-p strong,.inline-strong{color:#e2e8f0}
-ul{list-style:none;margin-top:6px}
-ul li{padding:5px 0 5px 22px;position:relative;color:#94a3b8;line-height:1.6;font-size:1.05rem}
-ul li::before{content:'›';position:absolute;left:0;color:#475569;font-size:1.3rem;line-height:1.4}
-ul li strong{color:#e2e8f0}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:40px;width:100%;margin-top:4px}
-.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;width:100%;margin-top:4px}
-table{width:100%;border-collapse:collapse;font-size:.98rem;margin-top:8px}
-th{background:#1e293b;color:#64748b;padding:9px 14px;text-align:left;font-weight:600;font-size:.9rem;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid #334155}
-td{padding:8px 14px;border-bottom:1px solid #1a2236;color:#cbd5e1;vertical-align:top}
-tr:last-child td{border-bottom:none}
-.pos{color:#34d399;font-weight:700}
-.neg{color:#f87171;font-weight:700}
-.neu{color:#fbbf24;font-weight:700}
-.best td{background:#0d2a1a}
-.worst td{background:#2a0d0d}
-pre{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:14px 18px;font-family:'Courier New',monospace;font-size:.92rem;color:#94a3b8;overflow-x:auto;margin-top:10px;line-height:1.6}
-pre .g{color:#34d399}
-pre .b{color:#60a5fa}
-pre .y{color:#fbbf24}
-pre .c{color:#475569}
-.callout{background:#1e293b;border-left:3px solid #3b82f6;border-radius:0 8px 8px 0;padding:12px 16px;font-size:1rem;color:#94a3b8;margin-top:16px;line-height:1.6}
-.callout strong{color:#e2e8f0}
-.callout.green{border-color:#10b981}
-.callout.amber{border-color:#f59e0b}
-.callout.purple{border-color:#8b5cf6}
-.card{background:#161f2e;border:1px solid #1e293b;border-radius:10px;padding:16px 18px}
-.card-title{font-size:1rem;font-weight:700;color:#f1f5f9;margin-bottom:4px}
-.card-tag{font-size:.82rem;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
-.card p{font-size:.95rem;margin-top:4px}
-.title-big{font-size:2.8rem;font-weight:800;color:#f1f5f9;line-height:1.15;margin-bottom:12px}
-.title-sub{font-size:1.2rem;color:#64748b;margin-bottom:20px}
-.badge{display:inline-block;background:#1e3a5f;color:#60a5fa;padding:6px 18px;border-radius:20px;font-size:.95rem;margin:6px 4px}
-.stat-row{display:flex;gap:32px;margin-top:16px}
-.stat-box{background:#1e293b;border-radius:10px;padding:14px 20px;flex:1;text-align:center}
-.stat-box .num{font-size:1.85rem;font-weight:800;color:#f1f5f9}
-.stat-box .lbl{font-size:.85rem;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
-.divider-num{font-size:5rem;font-weight:800;color:#1e293b;line-height:1;position:absolute;right:80px;bottom:60px}
-#nav{position:fixed;bottom:0;left:0;right:0;height:48px;background:#0a0e17;border-top:1px solid #1a2236;display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:100}
-#nav button{background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:5px 20px;border-radius:6px;cursor:pointer;font-size:.92rem;transition:all .15s}
-#nav button:hover:not(:disabled){background:#334155;color:#f1f5f9}
-#nav button:disabled{opacity:.25;cursor:not-allowed}
-#counter{color:#475569;font-size:.88rem}
-</style>
-</head>
-<body>
-<div id="progress"></div>
-<div id="deck">
-
-<!-- ═══════════════ SLIDE 1: TITLE ═══════════════ -->
-<div class="slide active" data-s="0">
-  <div class="title-big">Algorithmic Trading Bot<br>on BingX Perpetual Futures</div>
-  <div class="title-sub">6 Strategies &nbsp;·&nbsp; 5 Crypto Pairs &nbsp;·&nbsp; 7-Month Full Cycle &nbsp;·&nbsp; Two-Stage Exit + ADX + 4H MTF</div>
-  <div>
-    <span class="badge">Group [1]</span>
-    <span class="badge">112306068</span>
-    <span class="badge">May 2025</span>
-  </div>
-  <div class="divider-num">01</div>
-</div>
-
-<!-- ═══════════════ SPEAKER 1 — INTRODUCTION ═══════════════ -->
-
-<!-- Slide 2 -->
-<div class="slide" data-s="1">
-  <div class="chip">Speaker 1 · Introduction</div>
-  <h1>Why We Built This</h1>
-  <p>Most retail traders lose money — not because their ideas are wrong, but because of three things:</p>
-  <ul style="margin-top:16px">
-    <li><strong>Emotions</strong> — holding losing trades too long, cutting winners too early</li>
-    <li><strong>Inconsistency</strong> — the same strategy executed differently on different days</li>
-    <li><strong>Speed</strong> — missing entries by seconds, second-guessing at the last moment</li>
-  </ul>
-  <div class="callout" style="margin-top:24px">
-    <strong>Our question:</strong> Do common technical strategies actually make money on crypto futures — once you properly account for fees, funding rates, and leverage?
-  </div>
-</div>
-
-<!-- Slide 3 -->
-<div class="slide" data-s="1">
-  <div class="chip">Speaker 1 · Introduction</div>
-  <h1>Perpetual Futures 101</h1>
-  <div class="two-col">
-    <div>
-      <h2>How they differ from spot</h2>
-      <ul>
-        <li><strong>Go short</strong> — profit when price falls</li>
-        <li><strong>Leverage</strong> — control 20× your deposit</li>
-        <li><strong>No expiry</strong> — hold as long as you want</li>
-        <li><strong>Funding rate</strong> — every 8 hours, one side pays the other (~0.01% of notional)</li>
-      </ul>
-      <div class="callout amber" style="margin-top:18px;font-size:.85rem">
-        We used BingX <strong>VST (Virtual Simulation Trading)</strong> — paper trading with fake money on real market data. Zero financial risk.
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BingX Algo Trading Bot — Group Presentation</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        background: #0d1117;
+        color: #e0e6f0;
+        height: 100vh;
+        overflow: hidden;
+        user-select: none;
+      }
+      #progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: #3b82f6;
+        transition: width 0.3s ease;
+        z-index: 200;
+      }
+      #deck {
+        width: 100%;
+        height: 100vh;
+      }
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        padding: 56px 80px 72px;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+      }
+      .slide.active {
+        display: flex;
+        opacity: 1;
+      }
+      .slide[data-s="1"] {
+        border-left: 5px solid #3b82f6;
+      }
+      .slide[data-s="2"] {
+        border-left: 5px solid #10b981;
+      }
+      .slide[data-s="3"] {
+        border-left: 5px solid #f59e0b;
+      }
+      .slide[data-s="4"] {
+        border-left: 5px solid #8b5cf6;
+      }
+      .slide[data-s="0"] {
+        border-left: none;
+        background: linear-gradient(135deg, #0f172a 0%, #1a2744 100%);
+        align-items: center;
+        text-align: center;
+      }
+      .chip {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+      }
+      [data-s="1"] .chip {
+        background: #1e3a5f;
+        color: #60a5fa;
+      }
+      [data-s="2"] .chip {
+        background: #064e3b;
+        color: #34d399;
+      }
+      [data-s="3"] .chip {
+        background: #451a03;
+        color: #fbbf24;
+      }
+      [data-s="4"] .chip {
+        background: #2e1065;
+        color: #a78bfa;
+      }
+      h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #f1f5f9;
+        line-height: 1.25;
+        margin-bottom: 20px;
+      }
+      h2 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #94a3b8;
+        margin-bottom: 10px;
+        margin-top: 20px;
+      }
+      p {
+        color: #94a3b8;
+        font-size: 1.05rem;
+        line-height: 1.65;
+        margin-top: 10px;
+      }
+      p strong,
+      .inline-strong {
+        color: #e2e8f0;
+      }
+      ul {
+        list-style: none;
+        margin-top: 6px;
+      }
+      ul li {
+        padding: 5px 0 5px 22px;
+        position: relative;
+        color: #94a3b8;
+        line-height: 1.6;
+        font-size: 1.05rem;
+      }
+      ul li::before {
+        content: "›";
+        position: absolute;
+        left: 0;
+        color: #475569;
+        font-size: 1.3rem;
+        line-height: 1.4;
+      }
+      ul li strong {
+        color: #e2e8f0;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        width: 100%;
+        margin-top: 4px;
+      }
+      .three-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 24px;
+        width: 100%;
+        margin-top: 4px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.98rem;
+        margin-top: 8px;
+      }
+      th {
+        background: #1e293b;
+        color: #64748b;
+        padding: 9px 14px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        border-bottom: 2px solid #334155;
+      }
+      td {
+        padding: 8px 14px;
+        border-bottom: 1px solid #1a2236;
+        color: #cbd5e1;
+        vertical-align: top;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      .pos {
+        color: #34d399;
+        font-weight: 700;
+      }
+      .neg {
+        color: #f87171;
+        font-weight: 700;
+      }
+      .neu {
+        color: #fbbf24;
+        font-weight: 700;
+      }
+      .best td {
+        background: #0d2a1a;
+      }
+      .worst td {
+        background: #2a0d0d;
+      }
+      pre {
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 14px 18px;
+        font-family: "Courier New", monospace;
+        font-size: 0.92rem;
+        color: #94a3b8;
+        overflow-x: auto;
+        margin-top: 10px;
+        line-height: 1.6;
+      }
+      pre .g {
+        color: #34d399;
+      }
+      pre .b {
+        color: #60a5fa;
+      }
+      pre .y {
+        color: #fbbf24;
+      }
+      pre .c {
+        color: #475569;
+      }
+      .callout {
+        background: #1e293b;
+        border-left: 3px solid #3b82f6;
+        border-radius: 0 8px 8px 0;
+        padding: 12px 16px;
+        font-size: 1rem;
+        color: #94a3b8;
+        margin-top: 16px;
+        line-height: 1.6;
+      }
+      .callout strong {
+        color: #e2e8f0;
+      }
+      .callout.green {
+        border-color: #10b981;
+      }
+      .callout.amber {
+        border-color: #f59e0b;
+      }
+      .callout.purple {
+        border-color: #8b5cf6;
+      }
+      .card {
+        background: #161f2e;
+        border: 1px solid #1e293b;
+        border-radius: 10px;
+        padding: 16px 18px;
+      }
+      .card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #f1f5f9;
+        margin-bottom: 4px;
+      }
+      .card-tag {
+        font-size: 0.82rem;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+      }
+      .card p {
+        font-size: 0.95rem;
+        margin-top: 4px;
+      }
+      .title-big {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: #f1f5f9;
+        line-height: 1.15;
+        margin-bottom: 12px;
+      }
+      .title-sub {
+        font-size: 1.2rem;
+        color: #64748b;
+        margin-bottom: 20px;
+      }
+      .badge {
+        display: inline-block;
+        background: #1e3a5f;
+        color: #60a5fa;
+        padding: 6px 18px;
+        border-radius: 20px;
+        font-size: 0.95rem;
+        margin: 6px 4px;
+      }
+      .stat-row {
+        display: flex;
+        gap: 32px;
+        margin-top: 16px;
+      }
+      .stat-box {
+        background: #1e293b;
+        border-radius: 10px;
+        padding: 14px 20px;
+        flex: 1;
+        text-align: center;
+      }
+      .stat-box .num {
+        font-size: 1.85rem;
+        font-weight: 800;
+        color: #f1f5f9;
+      }
+      .stat-box .lbl {
+        font-size: 0.85rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 2px;
+      }
+      .divider-num {
+        font-size: 5rem;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1;
+        position: absolute;
+        right: 80px;
+        bottom: 60px;
+      }
+      #nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 48px;
+        background: #0a0e17;
+        border-top: 1px solid #1a2236;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        z-index: 100;
+      }
+      #nav button {
+        background: #1e293b;
+        border: 1px solid #334155;
+        color: #94a3b8;
+        padding: 5px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.92rem;
+        transition: all 0.15s;
+      }
+      #nav button:hover:not(:disabled) {
+        background: #334155;
+        color: #f1f5f9;
+      }
+      #nav button:disabled {
+        opacity: 0.25;
+        cursor: not-allowed;
+      }
+      #counter {
+        color: #475569;
+        font-size: 0.88rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="progress"></div>
+    <div id="deck">
+      <!-- ═══════════════ SLIDE 1: TITLE ═══════════════ -->
+      <div class="slide active" data-s="0">
+        <div class="title-big">
+          Algorithmic Trading Bot<br />on BingX Perpetual Futures
+        </div>
+        <div class="title-sub">
+          6 Strategies &nbsp;·&nbsp; 5 Crypto Pairs &nbsp;·&nbsp; 7-Month Full
+          Cycle &nbsp;·&nbsp; Two-Stage Exit + ADX + 4H MTF
+        </div>
+        <div>
+          <span class="badge">Group [1]</span>
+          <span class="badge">112306068 鄭博謙</span>
+          <span class="badge">112306074 柯穎文</span>
+          <span class="badge">112306060 劉冠昕</span>
+          <span class="badge">113266008 黃泓儒</span>
+          <span class="badge">May 2025</span>
+        </div>
+        <div class="divider-num">01</div>
       </div>
-    </div>
-    <div>
-      <h2>Cost example: 1 trade</h2>
-      <table>
-        <tr><th>Item</th><th>Amount</th></tr>
-        <tr><td>Notional position</td><td>1,000 USDT</td></tr>
-        <tr><td>Margin deposited (20×)</td><td>50 USDT</td></tr>
-        <tr><td>Taker fee (open + close)</td><td class="neg">−1.00 USDT</td></tr>
-        <tr><td>Funding per 8h</td><td class="neg">−0.10 USDT</td></tr>
-        <tr><td>Net cost before PnL</td><td class="neg">−1.10 USDT</td></tr>
-      </table>
-    </div>
-  </div>
-</div>
 
-<!-- Slide 4 -->
-<div class="slide" data-s="1">
-  <div class="chip">Speaker 1 · Introduction</div>
-  <h1>Project Scope</h1>
-  <div class="two-col">
-    <div>
-      <h2>In scope</h2>
-      <ul>
-        <li>6 automated strategies (incl. Adaptive)</li>
-        <li>5 crypto pairs: BTC, ETH, SOL, BNB, XRP</li>
-        <li>1-hour candles + 4H MTF confirmation</li>
-        <li>20× leverage with fee + funding model</li>
-        <li>Paper trading on BingX VST</li>
-      </ul>
-    </div>
-    <div>
-      <h2>Out of scope</h2>
-      <ul>
-        <li>High-frequency trading (&lt;1 min)</li>
-        <li>On-chain / DeFi protocols</li>
-        <li>Fundamental / news analysis</li>
-        <li>Live trading with real money</li>
-        <li>Portfolio-level optimization</li>
-      </ul>
-    </div>
-  </div>
-  <div class="callout green" style="margin-top:20px">
-    All backtesting uses live data pulled from BingX public API — no synthetic data, no look-ahead bias.
-  </div>
-</div>
+      <!-- ═══════════════ SPEAKER 1 — INTRODUCTION ═══════════════ -->
 
-<!-- Slide 5 -->
-<div class="slide" data-s="1">
-  <div class="chip">Speaker 1 · Introduction</div>
-  <h1>Six Strategies, Six Philosophies</h1>
-  <div class="two-col" style="margin-top:8px">
-    <div class="card">
-      <div class="card-tag">Trend Following</div>
-      <div class="card-title">EMA Cross (9 / 21)</div>
-      <p>Go long when the fast EMA crosses above the slow EMA — ride the momentum until the cross reverses.</p>
-    </div>
-    <div class="card">
-      <div class="card-tag">Trend Confirmation</div>
-      <div class="card-title">MACD Cross (12 / 26 / 9)</div>
-      <p>Enter only when MACD line crosses its signal line — two indicators must agree before taking the trade.</p>
-    </div>
-    <div class="card">
-      <div class="card-tag">Mean Reversion</div>
-      <div class="card-title">Bollinger Bands (20 / 2σ)</div>
-      <p>Buy when price is too cheap (below lower band), sell when too expensive — bet that it returns to average.</p>
-    </div>
-    <div class="card">
-      <div class="card-tag">Structure Breakout</div>
-      <div class="card-title">SR + MACD Breakout</div>
-      <p>Wait for price to break a key support/resistance level, confirmed by MACD histogram momentum. ATR-based dynamic stop loss.</p>
-    </div>
-    <div class="card">
-      <div class="card-tag">Volatility Breakout</div>
-      <div class="card-title">BB Squeeze</div>
-      <p>Detect when Bollinger Band width hits a multi-period minimum (market coiling). Enter the first expansion candle — the compressed energy releases into a directional move.</p>
-    </div>
-    <div class="card">
-      <div class="card-tag">Trend Continuation</div>
-      <div class="card-title">EMA Pullback</div>
-      <p>In a strong trend, wait for price to dip back to EMA(21) and form a reversal candle. Enter at structural support — value entry, not a chased crossover.</p>
-    </div>
-  </div>
-</div>
+      <!-- Slide 2 -->
+      <div class="slide" data-s="1">
+        <div class="chip">Speaker 1 · Introduction</div>
+        <h1>Why We Built This</h1>
+        <p>
+          Most retail traders lose money — not because their ideas are wrong,
+          but because of three things:
+        </p>
+        <ul style="margin-top: 16px">
+          <li>
+            <strong>Emotions</strong> — holding losing trades too long, cutting
+            winners too early
+          </li>
+          <li>
+            <strong>Inconsistency</strong> — the same strategy executed
+            differently on different days
+          </li>
+          <li>
+            <strong>Speed</strong> — missing entries by seconds, second-guessing
+            at the last moment
+          </li>
+        </ul>
+        <div class="callout" style="margin-top: 24px">
+          <strong>Our question:</strong> Do common technical strategies actually
+          make money on crypto futures — once you properly account for fees,
+          funding rates, and leverage?
+        </div>
+      </div>
 
-<!-- Slide 6 — Indicator Primer -->
-<div class="slide" data-s="1">
-  <div class="chip">Speaker 1 · Introduction</div>
-  <h1>What Are These Indicators?</h1>
-  <div class="two-col">
-    <div>
-      <div class="card">
-        <div class="card-title">EMA — Exponential Moving Average</div>
-        <p>A weighted price average where <strong>recent candles count more</strong>. Tracks the direction the market is trending. When a fast EMA (9) crosses a slow EMA (21), it signals a potential trend change. EMA(50) tells us the overall trend direction.</p>
+      <!-- Slide 3 -->
+      <div class="slide" data-s="1">
+        <div class="chip">Speaker 1 · Introduction</div>
+        <h1>Perpetual Futures 101</h1>
+        <div class="two-col">
+          <div>
+            <h2>How they differ from spot</h2>
+            <ul>
+              <li><strong>Go short</strong> — profit when price falls</li>
+              <li><strong>Leverage</strong> — control 20× your deposit</li>
+              <li><strong>No expiry</strong> — hold as long as you want</li>
+              <li>
+                <strong>Funding rate</strong> — every 8 hours, one side pays the
+                other (~0.01% of notional)
+              </li>
+            </ul>
+            <div
+              class="callout amber"
+              style="margin-top: 18px; font-size: 0.85rem"
+            >
+              We used BingX <strong>VST (Virtual Simulation Trading)</strong> —
+              paper trading with fake money on real market data. Zero financial
+              risk.
+            </div>
+          </div>
+          <div>
+            <h2>Cost example: 1 trade</h2>
+            <table>
+              <tr>
+                <th>Item</th>
+                <th>Amount</th>
+              </tr>
+              <tr>
+                <td>Notional position</td>
+                <td>1,000 USDT</td>
+              </tr>
+              <tr>
+                <td>Margin deposited (20×)</td>
+                <td>50 USDT</td>
+              </tr>
+              <tr>
+                <td>Taker fee (open + close)</td>
+                <td class="neg">−1.00 USDT</td>
+              </tr>
+              <tr>
+                <td>Funding per 8h</td>
+                <td class="neg">−0.10 USDT</td>
+              </tr>
+              <tr>
+                <td>Net cost before PnL</td>
+                <td class="neg">−1.10 USDT</td>
+              </tr>
+            </table>
+          </div>
+        </div>
       </div>
-      <div class="card" style="margin-top:12px">
-        <div class="card-title">MACD — Moving Avg Convergence Divergence</div>
-        <p>Measures the <strong>gap between two EMAs</strong>. When the MACD line crosses its signal line, it confirms a momentum shift. Positive histogram = upward momentum building. Slower than EMA cross → fewer, higher-quality signals.</p>
-      </div>
-    </div>
-    <div>
-      <div class="card">
-        <div class="card-title">Bollinger Bands (BB)</div>
-        <p>A price channel set at <strong>±2 standard deviations</strong> from a 20-period moving average. When price touches the band edges, it is statistically "unusual" — the market is likely to mean-revert back toward center. Wider bands = higher volatility.</p>
-      </div>
-      <div class="card" style="margin-top:12px">
-        <div class="card-title">RSI — Relative Strength Index</div>
-        <p>Measures <strong>momentum on a 0–100 scale</strong>. Above 70 = overbought (likely to fall). Below 30 = oversold (likely to rise). We use RSI as a <em>second confirmation</em> — only enter BB signals when RSI also confirms the extreme.</p>
-      </div>
-    </div>
-  </div>
-  <div class="callout" style="margin-top:14px;font-size:.85rem">
-    <strong>ATR (Average True Range)</strong> — measures how many dollars a coin typically moves per candle. BTC: ~$400/candle, XRP: ~$0.004. We size all stop losses as a multiple of ATR so they adapt to each coin's actual volatility.
-  </div>
-</div>
 
-<!-- Slide 6b: BB Squeeze & EMA Pullback Deep Dive -->
-<div class="slide" data-s="1">
-  <div class="chip">Speaker 1 · New Strategies</div>
-  <h1>Why We Added Two More Strategies Mid-Project</h1>
-  <div class="two-col">
-    <div>
-      <div class="card">
-        <div class="card-tag">Volatility Breakout</div>
-        <div class="card-title">BB Squeeze — Catch the Explosion</div>
-        <p>Markets breathe: periods of <strong>compression</strong> (low volatility, narrow BB) alternate with <strong>expansion</strong> (big moves). The squeeze detects when BB width hits a 30-bar minimum — the market is coiling. When width expands again, a big move has begun.</p>
-        <p style="margin-top:8px"><strong>Entry:</strong> first candle expanding out of the squeeze, confirmed by MACD histogram direction. EMA(200) macro gate applies.</p>
+      <!-- Slide 4 -->
+      <div class="slide" data-s="1">
+        <div class="chip">Speaker 1 · Introduction</div>
+        <h1>Project Scope</h1>
+        <div class="two-col">
+          <div>
+            <h2>In scope</h2>
+            <ul>
+              <li>6 automated strategies (incl. Adaptive)</li>
+              <li>5 crypto pairs: BTC, ETH, SOL, BNB, XRP</li>
+              <li>1-hour candles + 4H MTF confirmation</li>
+              <li>20× leverage with fee + funding model</li>
+              <li>Paper trading on BingX VST</li>
+            </ul>
+          </div>
+          <div>
+            <h2>Out of scope</h2>
+            <ul>
+              <li>High-frequency trading (&lt;1 min)</li>
+              <li>On-chain / DeFi protocols</li>
+              <li>Fundamental / news analysis</li>
+              <li>Live trading with real money</li>
+              <li>Portfolio-level optimization</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout green" style="margin-top: 20px">
+          All backtesting uses live data pulled from BingX public API — no
+          synthetic data, no look-ahead bias.
+        </div>
       </div>
-      <div class="callout green" style="margin-top:10px;font-size:.84rem">
-        <strong>Why it works:</strong> low volatility reliably precedes large moves. You enter at the start of the explosion — maximum R:R potential — not after the move is obvious.
-      </div>
-    </div>
-    <div>
-      <div class="card">
-        <div class="card-tag">Trend Continuation</div>
-        <div class="card-title">EMA Pullback — Buy the Dip Properly</div>
-        <p>Problem with crossover strategies: they enter at random points mid-trend, often at exhaustion highs. EMA Pullback waits for price to <strong>retrace to EMA(21)</strong> — the short-term dynamic support — then confirms buyers stepped back in.</p>
-        <p style="margin-top:8px"><strong>Entry requires:</strong> ADX &gt; 22 (trend confirmed) + candle low touches EMA(21) + candle <em>closes back above</em> EMA(21) with a bullish body. All three must align.</p>
-      </div>
-      <div class="callout green" style="margin-top:10px;font-size:.84rem">
-        <strong>Why it works:</strong> enter at <em>value</em> (structural support) with a confirmation that buyers defended the level — not at a random crossover signal.
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Slide 6c: Advanced Filters Explained -->
-<div class="slide" data-s="1">
-  <div class="chip">Speaker 1 · Advanced Techniques</div>
-  <h1>Three Techniques That Changed the Results</h1>
-  <div class="three-col">
-    <div class="card">
-      <div class="card-tag" style="background:#1e3a5f;color:#60a5fa">Regime Detection</div>
-      <div class="card-title">ADX — Average Directional Index</div>
-      <p>Measures <strong>trend strength</strong> on a 0–100 scale — direction-neutral. High ADX = strong trend (either direction). Low ADX = choppy/ranging market.</p>
-      <table style="margin-top:10px;font-size:.82rem">
-        <tr><th>ADX Value</th><th>Market State</th><th>Use</th></tr>
-        <tr><td>&gt; 22</td><td class="pos">Trending</td><td>EMA / MACD</td></tr>
-        <tr><td>20 – 22</td><td class="neu">Ambiguous</td><td>Skip trade</td></tr>
-        <tr><td>&lt; 20</td><td class="neg">Ranging/Choppy</td><td>BB / Squeeze</td></tr>
-      </table>
-      <p style="margin-top:8px;font-size:.82rem;color:#64748b">Classic mistake: trend strategy in a ranging market = constant whipsaws. ADX gate prevents this at source.</p>
-    </div>
-    <div class="card">
-      <div class="card-tag" style="background:#064e3b;color:#34d399">Volatility Trailing</div>
-      <div class="card-title">Chandelier Exit</div>
-      <p>A trailing stop that <strong>locks in new peaks</strong> and can only move in the profitable direction.</p>
-      <pre style="margin-top:8px;font-size:.78rem;padding:8px 10px">For LONG:
+      <!-- Slide 5 -->
+      <div class="slide" data-s="1">
+        <div class="chip">Speaker 1 · Introduction</div>
+        <h1>Six Strategies, Six Philosophies</h1>
+        <div class="two-col" style="margin-top: 8px">
+          <div class="card">
+            <div class="card-tag">Trend Following</div>
+            <div class="card-title">EMA Cross (9 / 21)</div>
+            <p>
+              Go long when the fast EMA crosses above the slow EMA — ride the
+              momentum until the cross reverses.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-tag">Trend Confirmation</div>
+            <div class="card-title">MACD Cross (12 / 26 / 9)</div>
+            <p>
+              Enter only when MACD line crosses its signal line — two indicators
+              must agree before taking the trade.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-tag">Mean Reversion</div>
+            <div class="card-title">Bollinger Bands (20 / 2σ)</div>
+            <p>
+              Buy when price is too cheap (below lower band), sell when too
+              expensive — bet that it returns to average.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-tag">Structure Breakout</div>
+            <div class="card-title">SR + MACD Breakout</div>
+            <p>
+              Wait for price to break a key support/resistance level, confirmed
+              by MACD histogram momentum. ATR-based dynamic stop loss.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-tag">Volatility Breakout</div>
+            <div class="card-title">BB Squeeze</div>
+            <p>
+              Detect when Bollinger Band width hits a multi-period minimum
+              (market coiling). Enter the first expansion candle — the
+              compressed energy releases into a directional move.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-tag">Trend Continuation</div>
+            <div class="card-title">EMA Pullback</div>
+            <p>
+              In a strong trend, wait for price to dip back to EMA(21) and form
+              a reversal candle. Enter at structural support — value entry, not
+              a chased crossover.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 6 — Indicator Primer -->
+      <div class="slide" data-s="1">
+        <div class="chip">Speaker 1 · Introduction</div>
+        <h1>What Are These Indicators?</h1>
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="card-title">EMA — Exponential Moving Average</div>
+              <p>
+                A weighted price average where
+                <strong>recent candles count more</strong>. Tracks the direction
+                the market is trending. When a fast EMA (9) crosses a slow EMA
+                (21), it signals a potential trend change. EMA(50) tells us the
+                overall trend direction.
+              </p>
+            </div>
+            <div class="card" style="margin-top: 12px">
+              <div class="card-title">
+                MACD — Moving Avg Convergence Divergence
+              </div>
+              <p>
+                Measures the <strong>gap between two EMAs</strong>. When the
+                MACD line crosses its signal line, it confirms a momentum shift.
+                Positive histogram = upward momentum building. Slower than EMA
+                cross → fewer, higher-quality signals.
+              </p>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">Bollinger Bands (BB)</div>
+              <p>
+                A price channel set at
+                <strong>±2 standard deviations</strong> from a 20-period moving
+                average. When price touches the band edges, it is statistically
+                "unusual" — the market is likely to mean-revert back toward
+                center. Wider bands = higher volatility.
+              </p>
+            </div>
+            <div class="card" style="margin-top: 12px">
+              <div class="card-title">RSI — Relative Strength Index</div>
+              <p>
+                Measures <strong>momentum on a 0–100 scale</strong>. Above 70 =
+                overbought (likely to fall). Below 30 = oversold (likely to
+                rise). We use RSI as a <em>second confirmation</em> — only enter
+                BB signals when RSI also confirms the extreme.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 14px; font-size: 0.85rem">
+          <strong>ATR (Average True Range)</strong> — measures how many dollars
+          a coin typically moves per candle. BTC: ~$400/candle, XRP: ~$0.004. We
+          size all stop losses as a multiple of ATR so they adapt to each coin's
+          actual volatility.
+        </div>
+      </div>
+
+      <!-- Slide 6b: BB Squeeze & EMA Pullback Deep Dive -->
+      <div class="slide" data-s="1">
+        <div class="chip">Speaker 1 · New Strategies</div>
+        <h1>Why We Added Two More Strategies Mid-Project</h1>
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="card-tag">Volatility Breakout</div>
+              <div class="card-title">BB Squeeze — Catch the Explosion</div>
+              <p>
+                Markets breathe: periods of <strong>compression</strong> (low
+                volatility, narrow BB) alternate with
+                <strong>expansion</strong> (big moves). The squeeze detects when
+                BB width hits a 30-bar minimum — the market is coiling. When
+                width expands again, a big move has begun.
+              </p>
+              <p style="margin-top: 8px">
+                <strong>Entry:</strong> first candle expanding out of the
+                squeeze, confirmed by MACD histogram direction. EMA(200) macro
+                gate applies.
+              </p>
+            </div>
+            <div
+              class="callout green"
+              style="margin-top: 10px; font-size: 0.84rem"
+            >
+              <strong>Why it works:</strong> low volatility reliably precedes
+              large moves. You enter at the start of the explosion — maximum R:R
+              potential — not after the move is obvious.
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-tag">Trend Continuation</div>
+              <div class="card-title">EMA Pullback — Buy the Dip Properly</div>
+              <p>
+                Problem with crossover strategies: they enter at random points
+                mid-trend, often at exhaustion highs. EMA Pullback waits for
+                price to <strong>retrace to EMA(21)</strong> — the short-term
+                dynamic support — then confirms buyers stepped back in.
+              </p>
+              <p style="margin-top: 8px">
+                <strong>Entry requires:</strong> ADX &gt; 22 (trend confirmed) +
+                candle low touches EMA(21) + candle
+                <em>closes back above</em> EMA(21) with a bullish body. All
+                three must align.
+              </p>
+            </div>
+            <div
+              class="callout green"
+              style="margin-top: 10px; font-size: 0.84rem"
+            >
+              <strong>Why it works:</strong> enter at <em>value</em> (structural
+              support) with a confirmation that buyers defended the level — not
+              at a random crossover signal.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 6c: Advanced Filters Explained -->
+      <div class="slide" data-s="1">
+        <div class="chip">Speaker 1 · Advanced Techniques</div>
+        <h1>Three Techniques That Changed the Results</h1>
+        <div class="three-col">
+          <div class="card">
+            <div class="card-tag" style="background: #1e3a5f; color: #60a5fa">
+              Regime Detection
+            </div>
+            <div class="card-title">ADX — Average Directional Index</div>
+            <p>
+              Measures <strong>trend strength</strong> on a 0–100 scale —
+              direction-neutral. High ADX = strong trend (either direction). Low
+              ADX = choppy/ranging market.
+            </p>
+            <table style="margin-top: 10px; font-size: 0.82rem">
+              <tr>
+                <th>ADX Value</th>
+                <th>Market State</th>
+                <th>Use</th>
+              </tr>
+              <tr>
+                <td>&gt; 22</td>
+                <td class="pos">Trending</td>
+                <td>EMA / MACD</td>
+              </tr>
+              <tr>
+                <td>20 – 22</td>
+                <td class="neu">Ambiguous</td>
+                <td>Skip trade</td>
+              </tr>
+              <tr>
+                <td>&lt; 20</td>
+                <td class="neg">Ranging/Choppy</td>
+                <td>BB / Squeeze</td>
+              </tr>
+            </table>
+            <p style="margin-top: 8px; font-size: 0.82rem; color: #64748b">
+              Classic mistake: trend strategy in a ranging market = constant
+              whipsaws. ADX gate prevents this at source.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-tag" style="background: #064e3b; color: #34d399">
+              Volatility Trailing
+            </div>
+            <div class="card-title">Chandelier Exit</div>
+            <p>
+              A trailing stop that <strong>locks in new peaks</strong> and can
+              only move in the profitable direction.
+            </p>
+            <pre style="margin-top: 8px; font-size: 0.78rem; padding: 8px 10px">
+For LONG:
 stop = peak_price − 2.5 × ATR
 
 For SHORT:
-stop = trough + 2.5 × ATR</pre>
-      <p style="margin-top:8px;font-size:.82rem">As price rises, stop ratchets up. When price finally drops to the stop, trade closes. <strong>Named after a chandelier hanging from the ceiling.</strong> Never moves backward against you.</p>
-    </div>
-    <div class="card">
-      <div class="card-tag" style="background:#451a03;color:#fbbf24">Blended Exit</div>
-      <div class="card-title">Two-Stage Exit</div>
-      <p>Replaces binary "hit TP or hit SL" with a two-part plan:</p>
-      <ul style="margin-top:8px;font-size:.84rem">
-        <li><strong>Stage 1:</strong> 50% position exits at +2R — profit locked, stop moves to breakeven</li>
-        <li><strong>Stage 2:</strong> remaining 50% trails with Chandelier Exit to capture the full move</li>
-      </ul>
-      <p style="margin-top:8px;font-size:.82rem;color:#64748b">Worst case after Stage 1: you breakeven on the second half. Best case: you ride a 5–10R move with half position.</p>
-    </div>
-  </div>
-  <div class="callout" style="margin-top:12px;font-size:.84rem">
-    Combined effect: win rates <strong>20–28% → 39–56%</strong> &nbsp;|&nbsp; total fee drag <strong>10–27% → 1.5–8%</strong> &nbsp;|&nbsp; max drawdowns cut by half on best strategies.
-  </div>
-</div>
+stop = trough + 2.5 × ATR</pre
+            >
+            <p style="margin-top: 8px; font-size: 0.82rem">
+              As price rises, stop ratchets up. When price finally drops to the
+              stop, trade closes.
+              <strong
+                >Named after a chandelier hanging from the ceiling.</strong
+              >
+              Never moves backward against you.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-tag" style="background: #451a03; color: #fbbf24">
+              Blended Exit
+            </div>
+            <div class="card-title">Two-Stage Exit</div>
+            <p>Replaces binary "hit TP or hit SL" with a two-part plan:</p>
+            <ul style="margin-top: 8px; font-size: 0.84rem">
+              <li>
+                <strong>Stage 1:</strong> 50% position exits at +2R — profit
+                locked, stop moves to breakeven
+              </li>
+              <li>
+                <strong>Stage 2:</strong> remaining 50% trails with Chandelier
+                Exit to capture the full move
+              </li>
+            </ul>
+            <p style="margin-top: 8px; font-size: 0.82rem; color: #64748b">
+              Worst case after Stage 1: you breakeven on the second half. Best
+              case: you ride a 5–10R move with half position.
+            </p>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 12px; font-size: 0.84rem">
+          Combined effect: win rates
+          <strong>20–28% → 39–56%</strong> &nbsp;|&nbsp; total fee drag
+          <strong>10–27% → 1.5–8%</strong> &nbsp;|&nbsp; max drawdowns cut by
+          half on best strategies.
+        </div>
+      </div>
 
-<!-- Slide 6d: Strategy Evolution Timeline -->
-<div class="slide" data-s="1">
-  <div class="chip">Speaker 1 · Evolution</div>
-  <h1>How Our Strategy Evolved — Version by Version</h1>
-  <table>
-    <tr><th style="width:10%">Ver.</th><th style="width:12%">Timeframe</th><th>What We Added</th><th>Win Rate</th><th>Best Return</th><th>Worst Return</th><th>Avg Cost</th></tr>
-    <tr class="worst">
-      <td><strong>v1</strong><br><span style="color:#475569;font-size:.75rem">Basic</span></td>
-      <td>15-minute</td>
-      <td style="font-size:.84rem">Fixed % stop · Basic EMA/MACD crossover · No regime filter · No confirmation</td>
-      <td class="neg">20–28%</td>
-      <td class="neg">−5%</td>
-      <td class="neg">−27%</td>
-      <td class="neg">10–27%</td>
-    </tr>
-    <tr>
-      <td><strong>v2</strong><br><span style="color:#475569;font-size:.75rem">Filtered</span></td>
-      <td>1-hour</td>
-      <td style="font-size:.84rem">ATR stop · ADX(14) regime gate · 4H MTF · Session filter · Two-stage exit · EMA(200) buffer · Vol-risk sizing</td>
-      <td class="neu">39–45%</td>
-      <td class="pos">+9.28%<br><span style="color:#475569;font-size:.75rem">ETH EMA bear</span></td>
-      <td class="neg">−11.7%</td>
-      <td>4–8%</td>
-    </tr>
-    <tr>
-      <td><strong>v2b</strong><br><span style="color:#475569;font-size:.75rem">New strategies</span></td>
-      <td>1-hour</td>
-      <td style="font-size:.84rem">+ BB Squeeze · + EMA Pullback · 7-month full-cycle window</td>
-      <td class="pos">44–50%</td>
-      <td class="pos">+11.92%<br><span style="color:#475569;font-size:.75rem">BNB BB both-sides</span></td>
-      <td class="neg">−23.5%</td>
-      <td>1.5–8%</td>
-    </tr>
-    <tr class="best">
-      <td><strong>v3</strong><br><span style="color:#475569;font-size:.75rem">Directional</span></td>
-      <td>1-hour</td>
-      <td style="font-size:.84rem">+ <strong>Direction bias</strong> (long-only / short-only per coin) — the single biggest improvement</td>
-      <td class="pos">50–56%</td>
-      <td class="pos" style="font-weight:700">+19.61%<br><span style="color:#475569;font-size:.75rem">SOL SR+MACD short-only</span></td>
-      <td class="neg">−1.91%</td>
-      <td class="pos">1.5–5%</td>
-    </tr>
-  </table>
-  <div class="callout green" style="margin-top:12px">
-    <strong>The biggest single improvement was direction bias in v3</strong> — not a new indicator. SOL SR+MACD both-sides = −2.63% → short-only = +19.61%. Same entries, same exits, just filtered by direction. This costs nothing to implement.
-  </div>
-</div>
+      <!-- Slide 6d: Strategy Evolution Timeline -->
+      <div class="slide" data-s="1">
+        <div class="chip">Speaker 1 · Evolution</div>
+        <h1>How Our Strategy Evolved — Version by Version</h1>
+        <table>
+          <tr>
+            <th style="width: 10%">Ver.</th>
+            <th style="width: 12%">Timeframe</th>
+            <th>What We Added</th>
+            <th>Win Rate</th>
+            <th>Best Return</th>
+            <th>Worst Return</th>
+            <th>Avg Cost</th>
+          </tr>
+          <tr class="worst">
+            <td>
+              <strong>v1</strong><br /><span
+                style="color: #475569; font-size: 0.75rem"
+                >Basic</span
+              >
+            </td>
+            <td>15-minute</td>
+            <td style="font-size: 0.84rem">
+              Fixed % stop · Basic EMA/MACD crossover · No regime filter · No
+              confirmation
+            </td>
+            <td class="neg">20–28%</td>
+            <td class="neg">−5%</td>
+            <td class="neg">−27%</td>
+            <td class="neg">10–27%</td>
+          </tr>
+          <tr>
+            <td>
+              <strong>v2</strong><br /><span
+                style="color: #475569; font-size: 0.75rem"
+                >Filtered</span
+              >
+            </td>
+            <td>1-hour</td>
+            <td style="font-size: 0.84rem">
+              ATR stop · ADX(14) regime gate · 4H MTF · Session filter ·
+              Two-stage exit · EMA(200) buffer · Vol-risk sizing
+            </td>
+            <td class="neu">39–45%</td>
+            <td class="pos">
+              +9.28%<br /><span style="color: #475569; font-size: 0.75rem"
+                >ETH EMA bear</span
+              >
+            </td>
+            <td class="neg">−11.7%</td>
+            <td>4–8%</td>
+          </tr>
+          <tr>
+            <td>
+              <strong>v2b</strong><br /><span
+                style="color: #475569; font-size: 0.75rem"
+                >New strategies</span
+              >
+            </td>
+            <td>1-hour</td>
+            <td style="font-size: 0.84rem">
+              + BB Squeeze · + EMA Pullback · 7-month full-cycle window
+            </td>
+            <td class="pos">44–50%</td>
+            <td class="pos">
+              +11.92%<br /><span style="color: #475569; font-size: 0.75rem"
+                >BNB BB both-sides</span
+              >
+            </td>
+            <td class="neg">−23.5%</td>
+            <td>1.5–8%</td>
+          </tr>
+          <tr class="best">
+            <td>
+              <strong>v3</strong><br /><span
+                style="color: #475569; font-size: 0.75rem"
+                >Directional</span
+              >
+            </td>
+            <td>1-hour</td>
+            <td style="font-size: 0.84rem">
+              + <strong>Direction bias</strong> (long-only / short-only per
+              coin) — the single biggest improvement
+            </td>
+            <td class="pos">50–56%</td>
+            <td class="pos" style="font-weight: 700">
+              +19.61%<br /><span style="color: #475569; font-size: 0.75rem"
+                >SOL SR+MACD short-only</span
+              >
+            </td>
+            <td class="neg">−1.91%</td>
+            <td class="pos">1.5–5%</td>
+          </tr>
+        </table>
+        <div class="callout green" style="margin-top: 12px">
+          <strong
+            >The biggest single improvement was direction bias in v3</strong
+          >
+          — not a new indicator. SOL SR+MACD both-sides = −2.63% → short-only =
+          +19.61%. Same entries, same exits, just filtered by direction. This
+          costs nothing to implement.
+        </div>
+      </div>
 
-<!-- ═══════════════ SPEAKER 2 — ARCHITECTURE ═══════════════ -->
+      <!-- ═══════════════ SPEAKER 2 — ARCHITECTURE ═══════════════ -->
 
-<!-- Slide 6 -->
-<div class="slide" data-s="2">
-  <div class="chip">Speaker 2 · Architecture</div>
-  <h1>Two Ways to Generate Signals</h1>
-  <div class="two-col" style="margin-top:8px">
-    <div>
-      <h2>Path A — TradingView webhook</h2>
-      <pre><span class="b">TradingView alert</span>
+      <!-- Slide 6 -->
+      <div class="slide" data-s="2">
+        <div class="chip">Speaker 2 · Architecture</div>
+        <h1>Two Ways to Generate Signals</h1>
+        <div class="two-col" style="margin-top: 8px">
+          <div>
+            <h2>Path A — TradingView webhook</h2>
+            <pre><span class="b">TradingView alert</span>
   → HTTP webhook
   → Google Cloud Run
   → Pub/Sub queue
   → Local bot
   → <span class="g">BingX order</span></pre>
-      <p style="margin-top:10px;font-size:.85rem">Useful for complex Pine Script strategies. Requires cloud setup.</p>
-    </div>
-    <div>
-      <h2>Path B — Self-contained bot <span style="color:#34d399;font-size:.75rem">← what we use</span></h2>
-      <pre><span class="b">Bot fetches candles</span> from BingX
+            <p style="margin-top: 10px; font-size: 0.85rem">
+              Useful for complex Pine Script strategies. Requires cloud setup.
+            </p>
+          </div>
+          <div>
+            <h2>
+              Path B — Self-contained bot
+              <span style="color: #34d399; font-size: 0.75rem"
+                >← what we use</span
+              >
+            </h2>
+            <pre><span class="b">Bot fetches candles</span> from BingX
   → Runs indicator math
   → Generates signal
   → Checks risk rules
   → <span class="g">Places order</span></pre>
-      <p style="margin-top:10px;font-size:.85rem">No cloud needed. One Python command. Runs on any machine.</p>
-    </div>
-  </div>
-</div>
+            <p style="margin-top: 10px; font-size: 0.85rem">
+              No cloud needed. One Python command. Runs on any machine.
+            </p>
+          </div>
+        </div>
+      </div>
 
-<!-- Slide 7 -->
-<div class="slide" data-s="2">
-  <div class="chip">Speaker 2 · Architecture</div>
-  <h1>Key Components</h1>
-  <table>
-    <tr><th>Component</th><th>File</th><th>Purpose</th></tr>
-    <tr><td>Strategy engine</td><td><code>src/strategies/</code></td><td>Compute buy/sell signals from candle data (4 strategies)</td></tr>
-    <tr><td>Exchange client</td><td><code>src/exchange.py</code></td><td>Talk to BingX REST API via ccxt library</td></tr>
-    <tr><td>Backtest engine</td><td><code>src/backtest.py</code></td><td>Simulate on historical data — fees, funding, leverage all modelled</td></tr>
-    <tr><td>Risk manager</td><td><code>src/risk_manager.py</code></td><td>Circuit breaker, max positions, daily loss cap</td></tr>
-    <tr><td>Trade journal</td><td><code>src/journal.py</code></td><td>Log every trade to CSV for analysis</td></tr>
-    <tr><td>Bot runner</td><td><code>src/bot.py</code></td><td>Orchestrates everything — single run or continuous loop</td></tr>
-    <tr><td>S/R detector</td><td><code>src/structure.py</code></td><td>Identify pivot-based support and resistance zones</td></tr>
-  </table>
-</div>
+      <!-- Slide 7 -->
+      <div class="slide" data-s="2">
+        <div class="chip">Speaker 2 · Architecture</div>
+        <h1>Key Components</h1>
+        <table>
+          <tr>
+            <th>Component</th>
+            <th>File</th>
+            <th>Purpose</th>
+          </tr>
+          <tr>
+            <td>Strategy engine</td>
+            <td><code>src/strategies/</code></td>
+            <td>Compute buy/sell signals from candle data (4 strategies)</td>
+          </tr>
+          <tr>
+            <td>Exchange client</td>
+            <td><code>src/exchange.py</code></td>
+            <td>Talk to BingX REST API via ccxt library</td>
+          </tr>
+          <tr>
+            <td>Backtest engine</td>
+            <td><code>src/backtest.py</code></td>
+            <td>
+              Simulate on historical data — fees, funding, leverage all modelled
+            </td>
+          </tr>
+          <tr>
+            <td>Risk manager</td>
+            <td><code>src/risk_manager.py</code></td>
+            <td>Circuit breaker, max positions, daily loss cap</td>
+          </tr>
+          <tr>
+            <td>Trade journal</td>
+            <td><code>src/journal.py</code></td>
+            <td>Log every trade to CSV for analysis</td>
+          </tr>
+          <tr>
+            <td>Bot runner</td>
+            <td><code>src/bot.py</code></td>
+            <td>Orchestrates everything — single run or continuous loop</td>
+          </tr>
+          <tr>
+            <td>S/R detector</td>
+            <td><code>src/structure.py</code></td>
+            <td>Identify pivot-based support and resistance zones</td>
+          </tr>
+        </table>
+      </div>
 
-<!-- Slide 8 -->
-<div class="slide" data-s="2">
-  <div class="chip">Speaker 2 · Architecture</div>
-  <h1>Position Sizing — Risk-Based with Leverage</h1>
-  <div class="two-col">
-    <div>
-      <h2>The formula</h2>
-      <pre><span class="c"># Kelly criterion (simplified)</span>
+      <!-- Slide 8 -->
+      <div class="slide" data-s="2">
+        <div class="chip">Speaker 2 · Architecture</div>
+        <h1>Position Sizing — Risk-Based with Leverage</h1>
+        <div class="two-col">
+          <div>
+            <h2>The formula</h2>
+            <pre><span class="c"># Kelly criterion (simplified)</span>
 Kelly%  = win_rate − loss_rate / RR
 Risk    = equity × Kelly%
          <span class="c">(capped at 1% max)</span>
@@ -415,44 +980,76 @@ Risk    = equity × Kelly%
 <span class="c"># Notional position</span>
 Notional = Risk / SL_distance
          <span class="c">(capped at 20× equity)</span></pre>
-    </div>
-    <div>
-      <h2>Worked example</h2>
-      <table>
-        <tr><th>Variable</th><th>Value</th></tr>
-        <tr><td>Equity</td><td>10,000 USDT</td></tr>
-        <tr><td>Kelly → risk</td><td>1% → 100 USDT</td></tr>
-        <tr><td>SL distance</td><td>1%</td></tr>
-        <tr><td>Notional</td><td>10,000 USDT (1× equity)</td></tr>
-        <tr><td>Effective leverage</td><td class="pos">1× (far below 20× cap)</td></tr>
-      </table>
-      <div class="callout" style="margin-top:14px;font-size:.85rem">
-        Higher leverage ≠ more risk per trade. Each losing trade still costs exactly 1% of equity.
+          </div>
+          <div>
+            <h2>Worked example</h2>
+            <table>
+              <tr>
+                <th>Variable</th>
+                <th>Value</th>
+              </tr>
+              <tr>
+                <td>Equity</td>
+                <td>10,000 USDT</td>
+              </tr>
+              <tr>
+                <td>Kelly → risk</td>
+                <td>1% → 100 USDT</td>
+              </tr>
+              <tr>
+                <td>SL distance</td>
+                <td>1%</td>
+              </tr>
+              <tr>
+                <td>Notional</td>
+                <td>10,000 USDT (1× equity)</td>
+              </tr>
+              <tr>
+                <td>Effective leverage</td>
+                <td class="pos">1× (far below 20× cap)</td>
+              </tr>
+            </table>
+            <div class="callout" style="margin-top: 14px; font-size: 0.85rem">
+              Higher leverage ≠ more risk per trade. Each losing trade still
+              costs exactly 1% of equity.
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<!-- Slide 9 -->
-<div class="slide" data-s="2">
-  <div class="chip">Speaker 2 · Architecture</div>
-  <h1>Cost Model — Every Trade Has Two Fees</h1>
-  <div class="two-col">
-    <div>
-      <h2>Fee types</h2>
-      <ul>
-        <li><strong>Taker fee:</strong> 0.05% per side on notional<br>
-          <span style="color:#64748b;font-size:.85rem">Open + close = 0.10% round-trip</span></li>
-        <li style="margin-top:10px"><strong>Funding rate:</strong> 0.01% per 8 h on notional<br>
-          <span style="color:#64748b;font-size:.85rem">Longs pay shorts — or reverse if rate goes negative</span></li>
-      </ul>
-      <div class="callout amber" style="margin-top:18px;font-size:.85rem">
-        Over 8 trades on one symbol: <strong>~0.8–1.1% of equity</strong> goes to fees before any profit.
-      </div>
-    </div>
-    <div>
-      <h2>Calculation in code</h2>
-      <pre><span class="c"># Fee: open + close</span>
+      <!-- Slide 9 -->
+      <div class="slide" data-s="2">
+        <div class="chip">Speaker 2 · Architecture</div>
+        <h1>Cost Model — Every Trade Has Two Fees</h1>
+        <div class="two-col">
+          <div>
+            <h2>Fee types</h2>
+            <ul>
+              <li>
+                <strong>Taker fee:</strong> 0.05% per side on notional<br />
+                <span style="color: #64748b; font-size: 0.85rem"
+                  >Open + close = 0.10% round-trip</span
+                >
+              </li>
+              <li style="margin-top: 10px">
+                <strong>Funding rate:</strong> 0.01% per 8 h on notional<br />
+                <span style="color: #64748b; font-size: 0.85rem"
+                  >Longs pay shorts — or reverse if rate goes negative</span
+                >
+              </li>
+            </ul>
+            <div
+              class="callout amber"
+              style="margin-top: 18px; font-size: 0.85rem"
+            >
+              Over 8 trades on one symbol:
+              <strong>~0.8–1.1% of equity</strong> goes to fees before any
+              profit.
+            </div>
+          </div>
+          <div>
+            <h2>Calculation in code</h2>
+            <pre><span class="c"># Fee: open + close</span>
 fee = 2 × 0.0005 × position_size
 
 <span class="c"># Funding: prorated by hold time</span>
@@ -466,563 +1063,1352 @@ funding = hold_8h × 0.0001
     funding = −funding
 
 net_pnl = gross − fee − funding</pre>
-    </div>
-  </div>
-</div>
+          </div>
+        </div>
+      </div>
 
-<!-- Slide 10 -->
-<div class="slide" data-s="2">
-  <div class="chip">Speaker 2 · Architecture</div>
-  <h1>Risk Controls &amp; API Security</h1>
-  <div class="two-col">
-    <div>
-      <h2>Three layers of risk protection</h2>
-      <ul>
-        <li><strong>Per-trade cap:</strong> max 1% equity risk per position</li>
-        <li><strong>Daily circuit breaker:</strong> halt all new trades if daily loss reaches −5%</li>
-        <li><strong>Max open positions:</strong> 7 positions across all symbols simultaneously</li>
-      </ul>
-      <p style="margin-top:12px">All parameters are environment variables — no code edits needed to adjust risk.</p>
-    </div>
-    <div>
-      <h2>API key setup</h2>
-      <ul>
-        <li>Stored in <code>.env</code> file — <strong>never committed to git</strong></li>
-        <li>BingX VST key: paper trading, no real money</li>
-        <li>Permissions enabled: <strong>Read + Perpetual Futures only</strong></li>
-        <li><strong>Withdrawal:</strong> always disabled</li>
-        <li><strong>Transfer:</strong> always disabled</li>
-        <li>IP whitelist recommended for production</li>
-      </ul>
-    </div>
-  </div>
-</div>
+      <!-- Slide 10 -->
+      <div class="slide" data-s="2">
+        <div class="chip">Speaker 2 · Architecture</div>
+        <h1>Risk Controls &amp; API Security</h1>
+        <div class="two-col">
+          <div>
+            <h2>Three layers of risk protection</h2>
+            <ul>
+              <li>
+                <strong>Per-trade cap:</strong> max 1% equity risk per position
+              </li>
+              <li>
+                <strong>Daily circuit breaker:</strong> halt all new trades if
+                daily loss reaches −5%
+              </li>
+              <li>
+                <strong>Max open positions:</strong> 7 positions across all
+                symbols simultaneously
+              </li>
+            </ul>
+            <p style="margin-top: 12px">
+              All parameters are environment variables — no code edits needed to
+              adjust risk.
+            </p>
+          </div>
+          <div>
+            <h2>API key setup</h2>
+            <ul>
+              <li>
+                Stored in <code>.env</code> file —
+                <strong>never committed to git</strong>
+              </li>
+              <li>BingX VST key: paper trading, no real money</li>
+              <li>
+                Permissions enabled:
+                <strong>Read + Perpetual Futures only</strong>
+              </li>
+              <li><strong>Withdrawal:</strong> always disabled</li>
+              <li><strong>Transfer:</strong> always disabled</li>
+              <li>IP whitelist recommended for production</li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
-<!-- ═══════════════ SPEAKER 3 — RESULTS ═══════════════ -->
+      <!-- ═══════════════ SPEAKER 3 — RESULTS ═══════════════ -->
 
-<!-- Slide 11 -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Backtest Results</div>
-  <h1>Backtest Setup</h1>
-  <div class="two-col">
-    <table>
-      <tr><th>Parameter</th><th>Value</th></tr>
-      <tr><td>Symbols</td><td>BTC, ETH, SOL, BNB, XRP (perpetual)</td></tr>
-      <tr><td>Timeframe</td><td>1-hour candles + 4H MTF confirmation</td></tr>
-      <tr><td>Candles per symbol</td><td>2000 (~83 days, multi-page API fetch)</td></tr>
-      <tr><td>Initial equity</td><td>10,000 USDT</td></tr>
-      <tr><td>Risk per trade</td><td>1% of current equity (halved when ATR% &gt; 1.5× mean)</td></tr>
-      <tr><td>Max leverage</td><td>20×</td></tr>
-      <tr><td>Taker fee</td><td>0.05% per side (BingX rate)</td></tr>
-      <tr><td>Funding rate</td><td>0.01% per 8 hours</td></tr>
-    </table>
-    <div>
-      <h2>Execution assumptions</h2>
-      <ul>
-        <li>Market order at candle close price</li>
-        <li>TP / SL checked against next candle's high and low</li>
-        <li>If both TP and SL hit same candle → SL wins (conservative)</li>
-        <li>One position per symbol at a time</li>
-        <li>100-candle warmup period before first signal</li>
-        <li><strong>Two-stage exit:</strong> 50% exit at +2R (locked profit), then Chandelier Exit (ATR×2.5) trails remainder</li>
-        <li><strong>ADX(14) regime gate:</strong> &gt;22 = trending → MACD, &lt;20 = ranging → BB, 20–22 = skip trade</li>
-        <li><strong>Session filter:</strong> MACD entries only 08:00–20:00 UTC, no weekends</li>
-      </ul>
-      <div class="callout amber" style="margin-top:16px;font-size:.85rem">
-        Two market regimes tested: <strong>bear</strong> (Apr–May 2025, 45 days) and <strong>bull</strong> (Nov–Dec 2024, BTC 67k→100k). Binance spot data used for historical period (same price, public API).
+      <!-- Slide 11 -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Backtest Results</div>
+        <h1>Backtest Setup</h1>
+        <div class="two-col">
+          <table>
+            <tr>
+              <th>Parameter</th>
+              <th>Value</th>
+            </tr>
+            <tr>
+              <td>Symbols</td>
+              <td>BTC, ETH, SOL, BNB, XRP (perpetual)</td>
+            </tr>
+            <tr>
+              <td>Timeframe</td>
+              <td>1-hour candles + 4H MTF confirmation</td>
+            </tr>
+            <tr>
+              <td>Candles per symbol</td>
+              <td>2000 (~83 days, multi-page API fetch)</td>
+            </tr>
+            <tr>
+              <td>Initial equity</td>
+              <td>10,000 USDT</td>
+            </tr>
+            <tr>
+              <td>Risk per trade</td>
+              <td>1% of current equity (halved when ATR% &gt; 1.5× mean)</td>
+            </tr>
+            <tr>
+              <td>Max leverage</td>
+              <td>20×</td>
+            </tr>
+            <tr>
+              <td>Taker fee</td>
+              <td>0.05% per side (BingX rate)</td>
+            </tr>
+            <tr>
+              <td>Funding rate</td>
+              <td>0.01% per 8 hours</td>
+            </tr>
+          </table>
+          <div>
+            <h2>Execution assumptions</h2>
+            <ul>
+              <li>Market order at candle close price</li>
+              <li>TP / SL checked against next candle's high and low</li>
+              <li>
+                If both TP and SL hit same candle → SL wins (conservative)
+              </li>
+              <li>One position per symbol at a time</li>
+              <li>100-candle warmup period before first signal</li>
+              <li>
+                <strong>Two-stage exit:</strong> 50% exit at +2R (locked
+                profit), then Chandelier Exit (ATR×2.5) trails remainder
+              </li>
+              <li>
+                <strong>ADX(14) regime gate:</strong> &gt;22 = trending → MACD,
+                &lt;20 = ranging → BB, 20–22 = skip trade
+              </li>
+              <li>
+                <strong>Session filter:</strong> MACD entries only 08:00–20:00
+                UTC, no weekends
+              </li>
+            </ul>
+            <div
+              class="callout amber"
+              style="margin-top: 16px; font-size: 0.85rem"
+            >
+              Two market regimes tested: <strong>bear</strong> (Apr–May 2025, 45
+              days) and <strong>bull</strong> (Nov–Dec 2024, BTC 67k→100k).
+              Binance spot data used for historical period (same price, public
+              API).
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<!-- Slide 12 -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Backtest Results</div>
-  <h1>Strategy 1: EMA Cross + Trend Filter + RSI</h1>
-  <div class="two-col">
-    <div>
-      <h2>Improvements over basic EMA</h2>
-      <ul>
-        <li><strong>Trend filter:</strong> only long when price &gt; EMA(50), EMA(200) buffer ±0.5%</li>
-        <li><strong>RSI guard:</strong> long only when RSI 40–65 (not overextended)</li>
-        <li><strong>ATR-based SL:</strong> 1.5 × ATR below entry</li>
-        <li><strong>3:1 R:R target</strong> (break-even: 25% win rate)</li>
-        <li><strong>4H MTF:</strong> EMA(50) on 4H bars must agree with 1H direction</li>
-      </ul>
-      <h2>Average across 5 symbols (bear, both sides)</h2>
-      <div class="stat-row">
-        <div class="stat-box"><div class="num">52</div><div class="lbl">Trades</div></div>
-        <div class="stat-box"><div class="num neu">43%</div><div class="lbl">Win Rate</div></div>
-        <div class="stat-box"><div class="num neg">−3.36%</div><div class="lbl">Avg Return</div></div>
-        <div class="stat-box"><div class="num pos">4–7%</div><div class="lbl">Avg Cost</div></div>
+      <!-- Slide 12 -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Backtest Results</div>
+        <h1>Strategy 1: EMA Cross + Trend Filter + RSI</h1>
+        <div class="two-col">
+          <div>
+            <h2>Improvements over basic EMA</h2>
+            <ul>
+              <li>
+                <strong>Trend filter:</strong> only long when price &gt;
+                EMA(50), EMA(200) buffer ±0.5%
+              </li>
+              <li>
+                <strong>RSI guard:</strong> long only when RSI 40–65 (not
+                overextended)
+              </li>
+              <li><strong>ATR-based SL:</strong> 1.5 × ATR below entry</li>
+              <li>
+                <strong>3:1 R:R target</strong> (break-even: 25% win rate)
+              </li>
+              <li>
+                <strong>4H MTF:</strong> EMA(50) on 4H bars must agree with 1H
+                direction
+              </li>
+            </ul>
+            <h2>Average across 5 symbols (bear, both sides)</h2>
+            <div class="stat-row">
+              <div class="stat-box">
+                <div class="num">52</div>
+                <div class="lbl">Trades</div>
+              </div>
+              <div class="stat-box">
+                <div class="num neu">43%</div>
+                <div class="lbl">Win Rate</div>
+              </div>
+              <div class="stat-box">
+                <div class="num neg">−3.36%</div>
+                <div class="lbl">Avg Return</div>
+              </div>
+              <div class="stat-box">
+                <div class="num pos">4–7%</div>
+                <div class="lbl">Avg Cost</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2>Per-symbol breakdown (bear, both sides)</h2>
+            <table>
+              <tr>
+                <th>Symbol</th>
+                <th>Win%</th>
+                <th>Return</th>
+              </tr>
+              <tr>
+                <td>BTC</td>
+                <td class="neg">43%</td>
+                <td class="neg">−2.84%</td>
+              </tr>
+              <tr class="best">
+                <td>ETH</td>
+                <td class="neu">43%</td>
+                <td class="pos">+9.28%</td>
+              </tr>
+              <tr>
+                <td>SOL</td>
+                <td class="neg">43%</td>
+                <td class="neg">−3.93%</td>
+              </tr>
+              <tr class="worst">
+                <td>BNB</td>
+                <td class="neg">43%</td>
+                <td class="neg">−7.91%</td>
+              </tr>
+              <tr>
+                <td>XRP</td>
+                <td class="neg">43%</td>
+                <td class="neg">−11.40%</td>
+              </tr>
+            </table>
+            <div class="callout" style="margin-top: 12px; font-size: 0.85rem">
+              Two-stage exit + Chandelier cut avg cost from 7.5% → 4–7%. Win
+              rate 43%. <strong>ETH +9.28%</strong> is the top single result —
+              two-stage exit captured the full ETH move. Average −3.36%.
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div>
-      <h2>Per-symbol breakdown (bear, both sides)</h2>
-      <table>
-        <tr><th>Symbol</th><th>Win%</th><th>Return</th></tr>
-        <tr><td>BTC</td><td class="neg">43%</td><td class="neg">−2.84%</td></tr>
-        <tr class="best"><td>ETH</td><td class="neu">43%</td><td class="pos">+9.28%</td></tr>
-        <tr><td>SOL</td><td class="neg">43%</td><td class="neg">−3.93%</td></tr>
-        <tr class="worst"><td>BNB</td><td class="neg">43%</td><td class="neg">−7.91%</td></tr>
-        <tr><td>XRP</td><td class="neg">43%</td><td class="neg">−11.40%</td></tr>
-      </table>
-      <div class="callout" style="margin-top:12px;font-size:.85rem">
-        Two-stage exit + Chandelier cut avg cost from 7.5% → 4–7%. Win rate 43%. <strong>ETH +9.28%</strong> is the top single result — two-stage exit captured the full ETH move. Average −3.36%.
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Slide 13 -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Backtest Results</div>
-  <h1>Strategy 2: MACD + Trend Filter + RSI</h1>
-  <div class="two-col">
-    <div>
-      <h2>Improvements over basic MACD</h2>
-      <ul>
-        <li><strong>Trend filter:</strong> only trade in direction of EMA(50)</li>
-        <li><strong>RSI guard:</strong> long only when RSI &lt; 65, short when RSI &gt; 35</li>
-        <li><strong>ATR-based SL:</strong> 1.5 × ATR — adapts to volatility</li>
-        <li><strong>3:1 R:R target</strong> — fewer trades, but each one matters more</li>
-        <li><strong>Session filter:</strong> entries only 08:00–20:00 UTC, no weekends</li>
-        <li><strong>ADX gate:</strong> only enter when ADX(14) &gt; 22 (trending regime)</li>
-      </ul>
-      <h2>Average across 5 symbols (bear, both sides)</h2>
-      <div class="stat-row">
-        <div class="stat-box"><div class="num">41</div><div class="lbl">Trades</div></div>
-        <div class="stat-box"><div class="num neu">45%</div><div class="lbl">Win Rate</div></div>
-        <div class="stat-box"><div class="num neg">−2.18%</div><div class="lbl">Avg Return</div></div>
-        <div class="stat-box"><div class="num pos">4–7%</div><div class="lbl">Avg Cost</div></div>
+      <!-- Slide 13 -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Backtest Results</div>
+        <h1>Strategy 2: MACD + Trend Filter + RSI</h1>
+        <div class="two-col">
+          <div>
+            <h2>Improvements over basic MACD</h2>
+            <ul>
+              <li>
+                <strong>Trend filter:</strong> only trade in direction of
+                EMA(50)
+              </li>
+              <li>
+                <strong>RSI guard:</strong> long only when RSI &lt; 65, short
+                when RSI &gt; 35
+              </li>
+              <li>
+                <strong>ATR-based SL:</strong> 1.5 × ATR — adapts to volatility
+              </li>
+              <li>
+                <strong>3:1 R:R target</strong> — fewer trades, but each one
+                matters more
+              </li>
+              <li>
+                <strong>Session filter:</strong> entries only 08:00–20:00 UTC,
+                no weekends
+              </li>
+              <li>
+                <strong>ADX gate:</strong> only enter when ADX(14) &gt; 22
+                (trending regime)
+              </li>
+            </ul>
+            <h2>Average across 5 symbols (bear, both sides)</h2>
+            <div class="stat-row">
+              <div class="stat-box">
+                <div class="num">41</div>
+                <div class="lbl">Trades</div>
+              </div>
+              <div class="stat-box">
+                <div class="num neu">45%</div>
+                <div class="lbl">Win Rate</div>
+              </div>
+              <div class="stat-box">
+                <div class="num neg">−2.18%</div>
+                <div class="lbl">Avg Return</div>
+              </div>
+              <div class="stat-box">
+                <div class="num pos">4–7%</div>
+                <div class="lbl">Avg Cost</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2>Per-symbol breakdown (bear, both sides)</h2>
+            <table>
+              <tr>
+                <th>Symbol</th>
+                <th>Win%</th>
+                <th>Return</th>
+              </tr>
+              <tr class="best">
+                <td>BTC</td>
+                <td class="neu">45%</td>
+                <td class="pos">+2.54%</td>
+              </tr>
+              <tr>
+                <td>ETH</td>
+                <td class="neg">45%</td>
+                <td class="neg">−5.54%</td>
+              </tr>
+              <tr class="worst">
+                <td>SOL</td>
+                <td class="neg">45%</td>
+                <td class="neg">−11.70%</td>
+              </tr>
+              <tr>
+                <td>BNB</td>
+                <td class="pos">45%</td>
+                <td class="pos">+4.70%</td>
+              </tr>
+              <tr>
+                <td>XRP</td>
+                <td class="neu">45%</td>
+                <td class="neg">−0.89%</td>
+              </tr>
+            </table>
+            <div class="callout" style="margin-top: 12px; font-size: 0.85rem">
+              Session filter + ADX gate cut noise dramatically. Win rate 45%.
+              Average −2.18% (improved from −8.2%).
+              <strong>BNB +4.70%, BTC +2.54%</strong> — session filter avoids
+              low-liquidity chop.
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div>
-      <h2>Per-symbol breakdown (bear, both sides)</h2>
-      <table>
-        <tr><th>Symbol</th><th>Win%</th><th>Return</th></tr>
-        <tr class="best"><td>BTC</td><td class="neu">45%</td><td class="pos">+2.54%</td></tr>
-        <tr><td>ETH</td><td class="neg">45%</td><td class="neg">−5.54%</td></tr>
-        <tr class="worst"><td>SOL</td><td class="neg">45%</td><td class="neg">−11.70%</td></tr>
-        <tr><td>BNB</td><td class="pos">45%</td><td class="pos">+4.70%</td></tr>
-        <tr><td>XRP</td><td class="neu">45%</td><td class="neg">−0.89%</td></tr>
-      </table>
-      <div class="callout" style="margin-top:12px;font-size:.85rem">
-        Session filter + ADX gate cut noise dramatically. Win rate 45%. Average −2.18% (improved from −8.2%). <strong>BNB +4.70%, BTC +2.54%</strong> — session filter avoids low-liquidity chop.
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Slide 14 -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Backtest Results</div>
-  <h1>Strategy 3: Bollinger Bands + RSI Double Confirmation</h1>
-  <div class="two-col">
-    <div>
-      <h2>Key upgrades</h2>
-      <ul>
-        <li><strong>RSI confirmation:</strong> long only when RSI &lt; 35 (truly oversold — both price AND momentum agree)</li>
-        <li><strong>TP = opposite band</strong> instead of middle band → R:R jumps from 0.4:1 to ~2–3:1</li>
-        <li><strong>ATR-based SL:</strong> 1.5 × ATR (minimum 1.8:1 R:R required)</li>
-        <li><strong>ADX gate:</strong> only enter when ADX(14) &lt; 20 (ranging regime — BB's sweet spot)</li>
-      </ul>
-      <h2>Average across 5 symbols (bear, both sides)</h2>
-      <div class="stat-row">
-        <div class="stat-box"><div class="num">47</div><div class="lbl">Trades</div></div>
-        <div class="stat-box"><div class="num neu">40%</div><div class="lbl">Win Rate</div></div>
-        <div class="stat-box"><div class="num neu">+0.34%</div><div class="lbl">Avg Return</div></div>
-        <div class="stat-box"><div class="num pos">4–7%</div><div class="lbl">Avg Cost</div></div>
+      <!-- Slide 14 -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Backtest Results</div>
+        <h1>Strategy 3: Bollinger Bands + RSI Double Confirmation</h1>
+        <div class="two-col">
+          <div>
+            <h2>Key upgrades</h2>
+            <ul>
+              <li>
+                <strong>RSI confirmation:</strong> long only when RSI &lt; 35
+                (truly oversold — both price AND momentum agree)
+              </li>
+              <li>
+                <strong>TP = opposite band</strong> instead of middle band → R:R
+                jumps from 0.4:1 to ~2–3:1
+              </li>
+              <li>
+                <strong>ATR-based SL:</strong> 1.5 × ATR (minimum 1.8:1 R:R
+                required)
+              </li>
+              <li>
+                <strong>ADX gate:</strong> only enter when ADX(14) &lt; 20
+                (ranging regime — BB's sweet spot)
+              </li>
+            </ul>
+            <h2>Average across 5 symbols (bear, both sides)</h2>
+            <div class="stat-row">
+              <div class="stat-box">
+                <div class="num">47</div>
+                <div class="lbl">Trades</div>
+              </div>
+              <div class="stat-box">
+                <div class="num neu">40%</div>
+                <div class="lbl">Win Rate</div>
+              </div>
+              <div class="stat-box">
+                <div class="num neu">+0.34%</div>
+                <div class="lbl">Avg Return</div>
+              </div>
+              <div class="stat-box">
+                <div class="num pos">4–7%</div>
+                <div class="lbl">Avg Cost</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2>Per-symbol breakdown (bear, both sides)</h2>
+            <table>
+              <tr>
+                <th>Symbol</th>
+                <th>Win%</th>
+                <th>Return</th>
+              </tr>
+              <tr>
+                <td>BTC</td>
+                <td class="neg">40%</td>
+                <td class="neg">−5.99%</td>
+              </tr>
+              <tr class="worst">
+                <td>ETH</td>
+                <td class="neg">40%</td>
+                <td class="neg">−12.90%</td>
+              </tr>
+              <tr class="best">
+                <td>SOL</td>
+                <td class="pos">40%</td>
+                <td class="pos">+11.77%</td>
+              </tr>
+              <tr>
+                <td>BNB</td>
+                <td class="neg">40%</td>
+                <td class="neg">−2.68%</td>
+              </tr>
+              <tr class="best">
+                <td>XRP</td>
+                <td class="pos">40%</td>
+                <td class="pos">+11.50%</td>
+              </tr>
+            </table>
+            <div
+              class="callout green"
+              style="margin-top: 12px; font-size: 0.85rem"
+            >
+              <strong
+                >BB +0.34% avg in bear — first near-positive result.</strong
+              >
+              ADX ranging gate filters out trend traps. SOL +11.77% and XRP
+              +11.50% lead. BB truly shines in bull long-only:
+              <strong>+4.57% avg</strong> (see regime slide).
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div>
-      <h2>Per-symbol breakdown (bear, both sides)</h2>
-      <table>
-        <tr><th>Symbol</th><th>Win%</th><th>Return</th></tr>
-        <tr><td>BTC</td><td class="neg">40%</td><td class="neg">−5.99%</td></tr>
-        <tr class="worst"><td>ETH</td><td class="neg">40%</td><td class="neg">−12.90%</td></tr>
-        <tr class="best"><td>SOL</td><td class="pos">40%</td><td class="pos">+11.77%</td></tr>
-        <tr><td>BNB</td><td class="neg">40%</td><td class="neg">−2.68%</td></tr>
-        <tr class="best"><td>XRP</td><td class="pos">40%</td><td class="pos">+11.50%</td></tr>
-      </table>
-      <div class="callout green" style="margin-top:12px;font-size:.85rem">
-        <strong>BB +0.34% avg in bear — first near-positive result.</strong> ADX ranging gate filters out trend traps. SOL +11.77% and XRP +11.50% lead. BB truly shines in bull long-only: <strong>+4.57% avg</strong> (see regime slide).
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Slide 15 -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Backtest Results</div>
-  <h1>Strategy 4: S/R Breakout + MACD Confirmation</h1>
-  <div class="two-col">
-    <div>
-      <h2>Logic (professional structure trading)</h2>
-      <ul>
-        <li><strong>S/R levels:</strong> pivot highs/lows over 80 candles clustered into zones</li>
-        <li><strong>Entry:</strong> price breaks level by 0.2% + MACD histogram confirms direction</li>
-        <li><strong>Stop loss:</strong> 1.0 × ATR below broken level (structure-based)</li>
-        <li><strong>Take profit:</strong> next structural level, skip if R:R &lt; 2.0</li>
-        <li><strong>Volatility-adjusted sizing:</strong> half position when ATR% &gt; 1.5× rolling mean</li>
-      </ul>
-      <h2>Average across 5 symbols (bear, both sides)</h2>
-      <div class="stat-row">
-        <div class="stat-box"><div class="num">54</div><div class="lbl">Trades</div></div>
-        <div class="stat-box"><div class="num neu">39%</div><div class="lbl">Win Rate</div></div>
-        <div class="stat-box"><div class="num neg">−3.14%</div><div class="lbl">Avg Return</div></div>
-        <div class="stat-box"><div class="num pos">4–7%</div><div class="lbl">Avg Cost</div></div>
+      <!-- Slide 15 -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Backtest Results</div>
+        <h1>Strategy 4: S/R Breakout + MACD Confirmation</h1>
+        <div class="two-col">
+          <div>
+            <h2>Logic (professional structure trading)</h2>
+            <ul>
+              <li>
+                <strong>S/R levels:</strong> pivot highs/lows over 80 candles
+                clustered into zones
+              </li>
+              <li>
+                <strong>Entry:</strong> price breaks level by 0.2% + MACD
+                histogram confirms direction
+              </li>
+              <li>
+                <strong>Stop loss:</strong> 1.0 × ATR below broken level
+                (structure-based)
+              </li>
+              <li>
+                <strong>Take profit:</strong> next structural level, skip if R:R
+                &lt; 2.0
+              </li>
+              <li>
+                <strong>Volatility-adjusted sizing:</strong> half position when
+                ATR% &gt; 1.5× rolling mean
+              </li>
+            </ul>
+            <h2>Average across 5 symbols (bear, both sides)</h2>
+            <div class="stat-row">
+              <div class="stat-box">
+                <div class="num">54</div>
+                <div class="lbl">Trades</div>
+              </div>
+              <div class="stat-box">
+                <div class="num neu">39%</div>
+                <div class="lbl">Win Rate</div>
+              </div>
+              <div class="stat-box">
+                <div class="num neg">−3.14%</div>
+                <div class="lbl">Avg Return</div>
+              </div>
+              <div class="stat-box">
+                <div class="num pos">4–7%</div>
+                <div class="lbl">Avg Cost</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2>Per-symbol breakdown (bear, both sides)</h2>
+            <table>
+              <tr>
+                <th>Symbol</th>
+                <th>Win%</th>
+                <th>Return</th>
+              </tr>
+              <tr class="best">
+                <td>BTC</td>
+                <td class="neu">39%</td>
+                <td class="pos">+3.30%</td>
+              </tr>
+              <tr>
+                <td>ETH</td>
+                <td class="neu">39%</td>
+                <td class="pos">+2.93%</td>
+              </tr>
+              <tr>
+                <td>SOL</td>
+                <td class="neg">39%</td>
+                <td class="neg">−4.35%</td>
+              </tr>
+              <tr class="worst">
+                <td>BNB</td>
+                <td class="neg">39%</td>
+                <td class="neg">−9.11%</td>
+              </tr>
+              <tr>
+                <td>XRP</td>
+                <td class="neg">39%</td>
+                <td class="neg">−8.49%</td>
+              </tr>
+            </table>
+            <div
+              class="callout purple"
+              style="margin-top: 12px; font-size: 0.85rem"
+            >
+              Bear both-sides avg −3.14%.
+              <strong>Short-only bias: +1.92% avg</strong> — best bear market
+              strategy when filtered short. BTC short-only hits
+              <strong>+12.79%</strong>. Volatility sizing protects against
+              SOL/XRP spikes.
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div>
-      <h2>Per-symbol breakdown (bear, both sides)</h2>
-      <table>
-        <tr><th>Symbol</th><th>Win%</th><th>Return</th></tr>
-        <tr class="best"><td>BTC</td><td class="neu">39%</td><td class="pos">+3.30%</td></tr>
-        <tr><td>ETH</td><td class="neu">39%</td><td class="pos">+2.93%</td></tr>
-        <tr><td>SOL</td><td class="neg">39%</td><td class="neg">−4.35%</td></tr>
-        <tr class="worst"><td>BNB</td><td class="neg">39%</td><td class="neg">−9.11%</td></tr>
-        <tr><td>XRP</td><td class="neg">39%</td><td class="neg">−8.49%</td></tr>
-      </table>
-      <div class="callout purple" style="margin-top:12px;font-size:.85rem">
-        Bear both-sides avg −3.14%. <strong>Short-only bias: +1.92% avg</strong> — best bear market strategy when filtered short. BTC short-only hits <strong>+12.79%</strong>. Volatility sizing protects against SOL/XRP spikes.
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Slide 16 -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Backtest Results</div>
-  <h1>Strategy 5: Adaptive Regime-Switching + 8-Filter Gate</h1>
-  <div class="two-col">
-    <div>
-      <h2>The core insight from autopsy</h2>
-      <ul>
-        <li><strong>Trending strategies (EMA/MACD)</strong> fail in ranging markets → whipsaws</li>
-        <li><strong>Mean-reversion (BB)</strong> fails in trending markets → stopped out repeatedly</li>
-        <li><strong>Solution:</strong> detect the regime, use the right tool automatically</li>
-      </ul>
-      <h2 style="margin-top:14px">8 simultaneous filters (ultra-selective)</h2>
-      <ul>
-        <li><strong>ADX(14) gate:</strong> &gt;22 → MACD mode, &lt;20 → BB mode, 20–22 → skip</li>
-        <li><strong>EMA(200) macro gate:</strong> longs only above EMA200; shorts only below</li>
-        <li><strong>4H MTF confirmation:</strong> EMA(50) on 4H bars must agree with 1H signal</li>
-        <li><strong>Volume filter:</strong> volume &gt; 1.0× 20-period average</li>
-        <li><strong>Session filter:</strong> 08:00–20:00 UTC, no weekends</li>
-        <li><strong>Volatility-adjusted sizing:</strong> half size when ATR% &gt; 1.5× mean</li>
-        <li><strong>EMA(200) buffer ±0.5%:</strong> avoids choppy zone near EMA200</li>
-        <li><strong>Two-stage exit:</strong> 50% at +2R, Chandelier (ATR×2.5) trails remainder</li>
-      </ul>
-    </div>
-    <div>
-      <h2>Bear market average (both sides)</h2>
-      <div class="stat-row">
-        <div class="stat-box"><div class="num">1.2</div><div class="lbl">Trades/symbol</div></div>
-        <div class="stat-box"><div class="num neu">0%</div><div class="lbl">Win Rate</div></div>
-        <div class="stat-box"><div class="num neg">−1.22%</div><div class="lbl">Avg Return</div></div>
-        <div class="stat-box"><div class="num pos">&lt;2%</div><div class="lbl">Avg Cost</div></div>
+      <!-- Slide 16 -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Backtest Results</div>
+        <h1>Strategy 5: Adaptive Regime-Switching + 8-Filter Gate</h1>
+        <div class="two-col">
+          <div>
+            <h2>The core insight from autopsy</h2>
+            <ul>
+              <li>
+                <strong>Trending strategies (EMA/MACD)</strong> fail in ranging
+                markets → whipsaws
+              </li>
+              <li>
+                <strong>Mean-reversion (BB)</strong> fails in trending markets →
+                stopped out repeatedly
+              </li>
+              <li>
+                <strong>Solution:</strong> detect the regime, use the right tool
+                automatically
+              </li>
+            </ul>
+            <h2 style="margin-top: 14px">
+              8 simultaneous filters (ultra-selective)
+            </h2>
+            <ul>
+              <li>
+                <strong>ADX(14) gate:</strong> &gt;22 → MACD mode, &lt;20 → BB
+                mode, 20–22 → skip
+              </li>
+              <li>
+                <strong>EMA(200) macro gate:</strong> longs only above EMA200;
+                shorts only below
+              </li>
+              <li>
+                <strong>4H MTF confirmation:</strong> EMA(50) on 4H bars must
+                agree with 1H signal
+              </li>
+              <li>
+                <strong>Volume filter:</strong> volume &gt; 1.0× 20-period
+                average
+              </li>
+              <li>
+                <strong>Session filter:</strong> 08:00–20:00 UTC, no weekends
+              </li>
+              <li>
+                <strong>Volatility-adjusted sizing:</strong> half size when ATR%
+                &gt; 1.5× mean
+              </li>
+              <li>
+                <strong>EMA(200) buffer ±0.5%:</strong> avoids choppy zone near
+                EMA200
+              </li>
+              <li>
+                <strong>Two-stage exit:</strong> 50% at +2R, Chandelier
+                (ATR×2.5) trails remainder
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h2>Bear market average (both sides)</h2>
+            <div class="stat-row">
+              <div class="stat-box">
+                <div class="num">1.2</div>
+                <div class="lbl">Trades/symbol</div>
+              </div>
+              <div class="stat-box">
+                <div class="num neu">0%</div>
+                <div class="lbl">Win Rate</div>
+              </div>
+              <div class="stat-box">
+                <div class="num neg">−1.22%</div>
+                <div class="lbl">Avg Return</div>
+              </div>
+              <div class="stat-box">
+                <div class="num pos">&lt;2%</div>
+                <div class="lbl">Avg Cost</div>
+              </div>
+            </div>
+            <h2 style="margin-top: 12px">
+              Per-symbol breakdown (bear, both sides)
+            </h2>
+            <table>
+              <tr>
+                <th>Symbol</th>
+                <th>Trades</th>
+                <th>Return</th>
+              </tr>
+              <tr>
+                <td>BTC</td>
+                <td>~1</td>
+                <td class="neg">−3.39%</td>
+              </tr>
+              <tr>
+                <td>ETH</td>
+                <td>~1</td>
+                <td class="neg">−1.11%</td>
+              </tr>
+              <tr>
+                <td>SOL</td>
+                <td>~2</td>
+                <td class="neg">−1.60%</td>
+              </tr>
+              <tr>
+                <td>BNB</td>
+                <td>0</td>
+                <td class="neu">0.00%</td>
+              </tr>
+              <tr>
+                <td>XRP</td>
+                <td>0</td>
+                <td class="neu">0.00%</td>
+              </tr>
+            </table>
+            <div
+              class="callout amber"
+              style="margin-top: 10px; font-size: 0.82rem"
+            >
+              <strong
+                >Ultra-selective: 8 filters reduce trades to 0–3 per
+                symbol</strong
+              >
+              (vs 40–60 for others). Avg cost &lt;2%. Demonstrates filter
+              quality vs. frequency tradeoff — threshold tuning needed to unlock
+              more opportunities.
+            </div>
+          </div>
+        </div>
       </div>
-      <h2 style="margin-top:12px">Per-symbol breakdown (bear, both sides)</h2>
-      <table>
-        <tr><th>Symbol</th><th>Trades</th><th>Return</th></tr>
-        <tr><td>BTC</td><td>~1</td><td class="neg">−3.39%</td></tr>
-        <tr><td>ETH</td><td>~1</td><td class="neg">−1.11%</td></tr>
-        <tr><td>SOL</td><td>~2</td><td class="neg">−1.60%</td></tr>
-        <tr><td>BNB</td><td>0</td><td class="neu">0.00%</td></tr>
-        <tr><td>XRP</td><td>0</td><td class="neu">0.00%</td></tr>
-      </table>
-      <div class="callout amber" style="margin-top:10px;font-size:.82rem">
-        <strong>Ultra-selective: 8 filters reduce trades to 0–3 per symbol</strong> (vs 40–60 for others). Avg cost &lt;2%. Demonstrates filter quality vs. frequency tradeoff — threshold tuning needed to unlock more opportunities.
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Slide 17 -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Backtest Results</div>
-  <h1>Bear Market Results — Apr–May 2025 (Two-Stage Exit + Chandelier)</h1>
-  <table>
-    <tr><th>Strategy</th><th>Avg Trades</th><th>Avg Win%</th><th>Avg Return</th><th>Avg Cost</th><th>Best Single</th><th>Verdict</th></tr>
-    <tr><td>EMA+Trend</td><td>52</td><td class="neu">43%</td><td class="neg">−3.36%</td><td class="neg">4–7%</td><td class="pos">ETH +9.28%</td><td>~ ETH outlier; avg still negative</td></tr>
-    <tr><td>MACD+RSI</td><td>41</td><td class="neu">45%</td><td class="neg">−2.18%</td><td>4–7%</td><td class="pos">BNB +4.70%</td><td>~ Session filter helps; SOL drags avg</td></tr>
-    <tr class="best"><td>BB+RSI</td><td>47</td><td class="neu">40%</td><td class="neu">+0.34%</td><td>4–7%</td><td class="pos">SOL +11.77%</td><td>✓ First near-positive avg! ADX ranging gate works</td></tr>
-    <tr><td>SR+MACD</td><td>54</td><td class="neg">39%</td><td class="neg">−3.14%</td><td>4–7%</td><td class="pos">BTC +3.30%</td><td>~ Short-only: +1.92% avg (best bear filter)</td></tr>
-    <tr class="best"><td>Adaptive (8 filters)</td><td>1.2</td><td class="neu">0%</td><td class="neg">−1.22%</td><td class="pos">&lt;2%</td><td class="neu">0.00%</td><td>~ Ultra-selective; 0–3 trades/symbol — tuning needed</td></tr>
-  </table>
-  <div class="callout green" style="margin-top:12px;font-size:.85rem">
-    <strong>Key upgrade:</strong> two-stage exit + Chandelier Exit + ADX gate. Win rates 39–45% (improved from 20–28% at 15m). Costs cut to 4–7% (vs 10–27%). <strong>BB is the standout: +0.34% avg in bear — first consistently near-positive strategy.</strong>
-  </div>
-</div>
+      <!-- Slide 17 -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Backtest Results</div>
+        <h1>
+          Bear Market Results — Apr–May 2025 (Two-Stage Exit + Chandelier)
+        </h1>
+        <table>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Trades</th>
+            <th>Avg Win%</th>
+            <th>Avg Return</th>
+            <th>Avg Cost</th>
+            <th>Best Single</th>
+            <th>Verdict</th>
+          </tr>
+          <tr>
+            <td>EMA+Trend</td>
+            <td>52</td>
+            <td class="neu">43%</td>
+            <td class="neg">−3.36%</td>
+            <td class="neg">4–7%</td>
+            <td class="pos">ETH +9.28%</td>
+            <td>~ ETH outlier; avg still negative</td>
+          </tr>
+          <tr>
+            <td>MACD+RSI</td>
+            <td>41</td>
+            <td class="neu">45%</td>
+            <td class="neg">−2.18%</td>
+            <td>4–7%</td>
+            <td class="pos">BNB +4.70%</td>
+            <td>~ Session filter helps; SOL drags avg</td>
+          </tr>
+          <tr class="best">
+            <td>BB+RSI</td>
+            <td>47</td>
+            <td class="neu">40%</td>
+            <td class="neu">+0.34%</td>
+            <td>4–7%</td>
+            <td class="pos">SOL +11.77%</td>
+            <td>✓ First near-positive avg! ADX ranging gate works</td>
+          </tr>
+          <tr>
+            <td>SR+MACD</td>
+            <td>54</td>
+            <td class="neg">39%</td>
+            <td class="neg">−3.14%</td>
+            <td>4–7%</td>
+            <td class="pos">BTC +3.30%</td>
+            <td>~ Short-only: +1.92% avg (best bear filter)</td>
+          </tr>
+          <tr class="best">
+            <td>Adaptive (8 filters)</td>
+            <td>1.2</td>
+            <td class="neu">0%</td>
+            <td class="neg">−1.22%</td>
+            <td class="pos">&lt;2%</td>
+            <td class="neu">0.00%</td>
+            <td>~ Ultra-selective; 0–3 trades/symbol — tuning needed</td>
+          </tr>
+        </table>
+        <div class="callout green" style="margin-top: 12px; font-size: 0.85rem">
+          <strong>Key upgrade:</strong> two-stage exit + Chandelier Exit + ADX
+          gate. Win rates 39–45% (improved from 20–28% at 15m). Costs cut to
+          4–7% (vs 10–27%).
+          <strong
+            >BB is the standout: +0.34% avg in bear — first consistently
+            near-positive strategy.</strong
+          >
+        </div>
+      </div>
 
-<!-- Slide 18 -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Backtest Results</div>
-  <h1>Bull Market Results — Nov–Dec 2024 (Unfiltered)</h1>
-  <table>
-    <tr><th>Strategy</th><th>Avg Trades</th><th>Avg Win%</th><th>Avg Return</th><th>Avg Cost</th><th>Best Single</th><th>Verdict</th></tr>
-    <tr class="worst"><td>EMA+Trend</td><td>~50</td><td class="pos">50%</td><td class="neg">−5.72%</td><td class="neg">4–7%</td><td class="pos">BTC +7.98% (long-only)</td><td>✗ Bull + both sides = wasted shorts</td></tr>
-    <tr class="worst"><td>MACD+RSI</td><td>~45</td><td class="neg">40%</td><td class="neg">−11.70%</td><td>4–7%</td><td class="neg">XRP +2.74% (long)</td><td>✗ Worst in bull — fires against bull trend</td></tr>
-    <tr><td>BB+RSI</td><td>~50</td><td class="pos">51%</td><td class="neg">−0.89%</td><td>3–5%</td><td class="pos">BNB +19.15%</td><td>~ Near-flat; BNB outlier; long-only flips positive</td></tr>
-    <tr><td>SR+MACD</td><td>~55</td><td class="pos">48%</td><td class="neg">−4.02%</td><td>3–5%</td><td class="pos">XRP +7.42%</td><td>✗ Long-only: +0.01% avg — barely breaks even</td></tr>
-    <tr class="best"><td>Adaptive (8 filters)</td><td>~1</td><td class="neu">0%</td><td class="neg">−1.25%</td><td class="pos">&lt;2%</td><td class="neg">SOL −1.03%</td><td>~ Ultra-selective; lowest cost; tuning needed</td></tr>
-  </table>
-  <div class="callout amber" style="margin-top:12px;font-size:.85rem">
-    <strong>Bull market highlight:</strong> most strategies worse unfiltered — both sides in a bull wastes signals on shorts. Long-only bias unlocks the gains. <strong>BB long-only = +4.57% avg</strong> (next slide). BNB BB unfiltered +19.15% is highest single result.
-  </div>
-</div>
+      <!-- Slide 18 -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Backtest Results</div>
+        <h1>Bull Market Results — Nov–Dec 2024 (Unfiltered)</h1>
+        <table>
+          <tr>
+            <th>Strategy</th>
+            <th>Avg Trades</th>
+            <th>Avg Win%</th>
+            <th>Avg Return</th>
+            <th>Avg Cost</th>
+            <th>Best Single</th>
+            <th>Verdict</th>
+          </tr>
+          <tr class="worst">
+            <td>EMA+Trend</td>
+            <td>~50</td>
+            <td class="pos">50%</td>
+            <td class="neg">−5.72%</td>
+            <td class="neg">4–7%</td>
+            <td class="pos">BTC +7.98% (long-only)</td>
+            <td>✗ Bull + both sides = wasted shorts</td>
+          </tr>
+          <tr class="worst">
+            <td>MACD+RSI</td>
+            <td>~45</td>
+            <td class="neg">40%</td>
+            <td class="neg">−11.70%</td>
+            <td>4–7%</td>
+            <td class="neg">XRP +2.74% (long)</td>
+            <td>✗ Worst in bull — fires against bull trend</td>
+          </tr>
+          <tr>
+            <td>BB+RSI</td>
+            <td>~50</td>
+            <td class="pos">51%</td>
+            <td class="neg">−0.89%</td>
+            <td>3–5%</td>
+            <td class="pos">BNB +19.15%</td>
+            <td>~ Near-flat; BNB outlier; long-only flips positive</td>
+          </tr>
+          <tr>
+            <td>SR+MACD</td>
+            <td>~55</td>
+            <td class="pos">48%</td>
+            <td class="neg">−4.02%</td>
+            <td>3–5%</td>
+            <td class="pos">XRP +7.42%</td>
+            <td>✗ Long-only: +0.01% avg — barely breaks even</td>
+          </tr>
+          <tr class="best">
+            <td>Adaptive (8 filters)</td>
+            <td>~1</td>
+            <td class="neu">0%</td>
+            <td class="neg">−1.25%</td>
+            <td class="pos">&lt;2%</td>
+            <td class="neg">SOL −1.03%</td>
+            <td>~ Ultra-selective; lowest cost; tuning needed</td>
+          </tr>
+        </table>
+        <div class="callout amber" style="margin-top: 12px; font-size: 0.85rem">
+          <strong>Bull market highlight:</strong> most strategies worse
+          unfiltered — both sides in a bull wastes signals on shorts. Long-only
+          bias unlocks the gains.
+          <strong>BB long-only = +4.57% avg</strong> (next slide). BNB BB
+          unfiltered +19.15% is highest single result.
+        </div>
+      </div>
 
-<!-- Slide 19 -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Regime-Classified Results</div>
-  <h1>What If We Only Trade With the Trend?</h1>
-  <p style="font-size:.88rem;color:#64748b;margin-bottom:8px">Bear market = short-only &nbsp;|&nbsp; Bull market = long-only &nbsp;|&nbsp; vs unfiltered (two-stage exit + Chandelier)</p>
-  <table>
-    <tr>
-      <th>Strategy</th>
-      <th>Bear both</th><th>Bear SHORT only</th>
-      <th>Bull both</th><th>Bull LONG only</th>
-    </tr>
-    <tr>
-      <td>EMA+Trend</td>
-      <td class="neg">−3.36%</td><td class="neg">−3.66%</td>
-      <td class="neg">−5.72%</td><td class="neg">−1.09%</td>
-    </tr>
-    <tr>
-      <td>MACD+RSI</td>
-      <td class="neg">−2.18%</td><td class="neg">−1.11%</td>
-      <td class="neg">−11.70%</td><td class="neg">−6.10%</td>
-    </tr>
-    <tr class="best">
-      <td>BB+RSI</td>
-      <td class="neu">+0.34%</td><td class="neu">+0.73%</td>
-      <td class="neg">−0.89%</td><td class="pos" style="font-weight:700;font-size:1.05rem">+4.57%</td>
-    </tr>
-    <tr>
-      <td>SR+MACD</td>
-      <td class="neg">−3.14%</td><td class="pos">+1.92%</td>
-      <td class="neg">−4.02%</td><td class="neu">+0.01%</td>
-    </tr>
-    <tr>
-      <td>Adaptive (8 filters)</td>
-      <td class="neg">−1.22%</td><td class="neg">−0.77%</td>
-      <td class="neg">−1.25%</td><td class="neg">−0.21%</td>
-    </tr>
-  </table>
-  <div class="callout green" style="margin-top:12px;font-size:.85rem">
-    <strong>BB is the standout.</strong> Bull long-only <strong>+4.57%</strong> — the first consistently positive result across strategies. Bear both-sides also +0.34% (ADX ranging gate working). SR+MACD bear short-only <strong>+1.92%</strong> — best bear strategy with directional bias. BTC SR short-only hits +12.79%.
-  </div>
-</div>
+      <!-- Slide 19 -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Regime-Classified Results</div>
+        <h1>What If We Only Trade With the Trend?</h1>
+        <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 8px">
+          Bear market = short-only &nbsp;|&nbsp; Bull market = long-only
+          &nbsp;|&nbsp; vs unfiltered (two-stage exit + Chandelier)
+        </p>
+        <table>
+          <tr>
+            <th>Strategy</th>
+            <th>Bear both</th>
+            <th>Bear SHORT only</th>
+            <th>Bull both</th>
+            <th>Bull LONG only</th>
+          </tr>
+          <tr>
+            <td>EMA+Trend</td>
+            <td class="neg">−3.36%</td>
+            <td class="neg">−3.66%</td>
+            <td class="neg">−5.72%</td>
+            <td class="neg">−1.09%</td>
+          </tr>
+          <tr>
+            <td>MACD+RSI</td>
+            <td class="neg">−2.18%</td>
+            <td class="neg">−1.11%</td>
+            <td class="neg">−11.70%</td>
+            <td class="neg">−6.10%</td>
+          </tr>
+          <tr class="best">
+            <td>BB+RSI</td>
+            <td class="neu">+0.34%</td>
+            <td class="neu">+0.73%</td>
+            <td class="neg">−0.89%</td>
+            <td class="pos" style="font-weight: 700; font-size: 1.05rem">
+              +4.57%
+            </td>
+          </tr>
+          <tr>
+            <td>SR+MACD</td>
+            <td class="neg">−3.14%</td>
+            <td class="pos">+1.92%</td>
+            <td class="neg">−4.02%</td>
+            <td class="neu">+0.01%</td>
+          </tr>
+          <tr>
+            <td>Adaptive (8 filters)</td>
+            <td class="neg">−1.22%</td>
+            <td class="neg">−0.77%</td>
+            <td class="neg">−1.25%</td>
+            <td class="neg">−0.21%</td>
+          </tr>
+        </table>
+        <div class="callout green" style="margin-top: 12px; font-size: 0.85rem">
+          <strong>BB is the standout.</strong> Bull long-only
+          <strong>+4.57%</strong> — the first consistently positive result
+          across strategies. Bear both-sides also +0.34% (ADX ranging gate
+          working). SR+MACD bear short-only <strong>+1.92%</strong> — best bear
+          strategy with directional bias. BTC SR short-only hits +12.79%.
+        </div>
+      </div>
 
-<!-- ═══════════════ SPEAKER 3 — EXIT TECHNIQUES ═══════════════ -->
+      <!-- ═══════════════ SPEAKER 3 — EXIT TECHNIQUES ═══════════════ -->
 
-<!-- Slide 19b: New Exit & Filter Techniques -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Backtest Results</div>
-  <h1>What Changed: 6 Upgraded Techniques</h1>
-  <div class="two-col">
-    <div>
-      <div class="card" style="margin-bottom:10px">
-        <div class="card-title">Two-Stage Exit + Chandelier</div>
-        <p><strong>50% of position exits at +2R</strong> — locks in profit immediately. The trailing half uses <strong>Chandelier Exit (ATR×2.5)</strong> to ride the rest of the move. Replaces simple 1R trailing stop.</p>
+      <!-- Slide 19b: New Exit & Filter Techniques -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Backtest Results</div>
+        <h1>What Changed: 6 Upgraded Techniques</h1>
+        <div class="two-col">
+          <div>
+            <div class="card" style="margin-bottom: 10px">
+              <div class="card-title">Two-Stage Exit + Chandelier</div>
+              <p>
+                <strong>50% of position exits at +2R</strong> — locks in profit
+                immediately. The trailing half uses
+                <strong>Chandelier Exit (ATR×2.5)</strong> to ride the rest of
+                the move. Replaces simple 1R trailing stop.
+              </p>
+            </div>
+            <div class="card" style="margin-bottom: 10px">
+              <div class="card-title">ADX(14) Regime Gate</div>
+              <p>
+                ADX &gt; 22 → trending market → use MACD. ADX &lt; 20 → ranging
+                market → use BB. ADX 20–22 → ambiguous → skip trade entirely.
+                Removes wrong-regime entries at source.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">4H Multi-Timeframe Confirmation</div>
+              <p>
+                EMA(50) calculated on aggregated 4H candles must agree with the
+                1H signal direction. Filters out 1H setups that conflict with
+                the bigger trend.
+              </p>
+            </div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom: 10px">
+              <div class="card-title">Session Filter (MACD)</div>
+              <p>
+                MACD entries only during
+                <strong>08:00–20:00 UTC, Mon–Fri</strong>. Avoids low-liquidity
+                Asian overnight sessions and weekend crypto pump/dump patterns.
+              </p>
+            </div>
+            <div class="card" style="margin-bottom: 10px">
+              <div class="card-title">Volatility-Adjusted Risk Sizing</div>
+              <p>
+                When ATR% &gt; 1.5× its own 50-bar rolling mean,
+                <strong>position size is halved</strong>. Normal 1% equity risk
+                in calm markets; automatic de-risking in volatile spikes.
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-title">EMA(200) Buffer ±0.5%</div>
+              <p>
+                No trades within 0.5% of the EMA(200) line. Avoids the choppy
+                indecision zone where trend direction is genuinely ambiguous and
+                false signals cluster.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="card" style="margin-bottom:10px">
-        <div class="card-title">ADX(14) Regime Gate</div>
-        <p>ADX &gt; 22 → trending market → use MACD. ADX &lt; 20 → ranging market → use BB. ADX 20–22 → ambiguous → skip trade entirely. Removes wrong-regime entries at source.</p>
-      </div>
-      <div class="card">
-        <div class="card-title">4H Multi-Timeframe Confirmation</div>
-        <p>EMA(50) calculated on aggregated 4H candles must agree with the 1H signal direction. Filters out 1H setups that conflict with the bigger trend.</p>
-      </div>
-    </div>
-    <div>
-      <div class="card" style="margin-bottom:10px">
-        <div class="card-title">Session Filter (MACD)</div>
-        <p>MACD entries only during <strong>08:00–20:00 UTC, Mon–Fri</strong>. Avoids low-liquidity Asian overnight sessions and weekend crypto pump/dump patterns.</p>
-      </div>
-      <div class="card" style="margin-bottom:10px">
-        <div class="card-title">Volatility-Adjusted Risk Sizing</div>
-        <p>When ATR% &gt; 1.5× its own 50-bar rolling mean, <strong>position size is halved</strong>. Normal 1% equity risk in calm markets; automatic de-risking in volatile spikes.</p>
-      </div>
-      <div class="card">
-        <div class="card-title">EMA(200) Buffer ±0.5%</div>
-        <p>No trades within 0.5% of the EMA(200) line. Avoids the choppy indecision zone where trend direction is genuinely ambiguous and false signals cluster.</p>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Slide 19c: 7-Month Full Cycle Results -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Full-Cycle Results</div>
-  <h1>7-Month Full Cycle: Nov 2024 → May 2025 (4,000 candles)</h1>
-  <div class="two-col">
-    <div>
-      <h2>Both-sides unfiltered — top performers</h2>
-      <table>
-        <tr><th>Coin · Strategy</th><th>Win%</th><th>Trades</th><th>Return</th><th>Max DD</th></tr>
-        <tr class="best"><td>BNB · BB+RSI</td><td class="pos">45%</td><td>93</td><td class="pos">+11.92%</td><td>11.4%</td></tr>
-        <tr class="best"><td>XRP · BB_Squeeze</td><td class="pos">50%</td><td>60</td><td class="pos">+11.37%</td><td>4.3%</td></tr>
-        <tr><td>XRP · EMA_Pullback</td><td class="neu">40%</td><td>35</td><td class="pos">+4.70%</td><td>6.4%</td></tr>
-        <tr><td>XRP · EMA+Trend</td><td class="pos">45%</td><td>101</td><td class="pos">+4.63%</td><td>8.4%</td></tr>
-        <tr><td>XRP · MACD+RSI</td><td class="pos">44%</td><td>97</td><td class="pos">+4.53%</td><td>13.5%</td></tr>
-      </table>
-      <div class="callout amber" style="margin-top:10px;font-size:.83rem">
-        BTC, ETH, SOL most strategies <strong>negative</strong> both-sides over 7 months. XRP and BNB stand out — each coin responds to different strategies.
+      <!-- Slide 19c: 7-Month Full Cycle Results -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Full-Cycle Results</div>
+        <h1>7-Month Full Cycle: Nov 2024 → May 2025 (4,000 candles)</h1>
+        <div class="two-col">
+          <div>
+            <h2>Both-sides unfiltered — top performers</h2>
+            <table>
+              <tr>
+                <th>Coin · Strategy</th>
+                <th>Win%</th>
+                <th>Trades</th>
+                <th>Return</th>
+                <th>Max DD</th>
+              </tr>
+              <tr class="best">
+                <td>BNB · BB+RSI</td>
+                <td class="pos">45%</td>
+                <td>93</td>
+                <td class="pos">+11.92%</td>
+                <td>11.4%</td>
+              </tr>
+              <tr class="best">
+                <td>XRP · BB_Squeeze</td>
+                <td class="pos">50%</td>
+                <td>60</td>
+                <td class="pos">+11.37%</td>
+                <td>4.3%</td>
+              </tr>
+              <tr>
+                <td>XRP · EMA_Pullback</td>
+                <td class="neu">40%</td>
+                <td>35</td>
+                <td class="pos">+4.70%</td>
+                <td>6.4%</td>
+              </tr>
+              <tr>
+                <td>XRP · EMA+Trend</td>
+                <td class="pos">45%</td>
+                <td>101</td>
+                <td class="pos">+4.63%</td>
+                <td>8.4%</td>
+              </tr>
+              <tr>
+                <td>XRP · MACD+RSI</td>
+                <td class="pos">44%</td>
+                <td>97</td>
+                <td class="pos">+4.53%</td>
+                <td>13.5%</td>
+              </tr>
+            </table>
+            <div
+              class="callout amber"
+              style="margin-top: 10px; font-size: 0.83rem"
+            >
+              BTC, ETH, SOL most strategies <strong>negative</strong> both-sides
+              over 7 months. XRP and BNB stand out — each coin responds to
+              different strategies.
+            </div>
+          </div>
+          <div>
+            <h2>Direction-filtered — top performers</h2>
+            <table>
+              <tr>
+                <th>Coin · Strategy</th>
+                <th>Filter</th>
+                <th>Win%</th>
+                <th>Return</th>
+                <th>Max DD</th>
+              </tr>
+              <tr class="best">
+                <td>SOL · SR+MACD</td>
+                <td>Short only</td>
+                <td class="pos">55%</td>
+                <td class="pos" style="font-weight: 700">+19.61%</td>
+                <td>2.4%</td>
+              </tr>
+              <tr class="best">
+                <td>BNB · BB+RSI</td>
+                <td>Short only</td>
+                <td class="pos">49%</td>
+                <td class="pos">+14.45%</td>
+                <td>5.6%</td>
+              </tr>
+              <tr>
+                <td>XRP · BB_Squeeze</td>
+                <td>Long only</td>
+                <td class="pos">56%</td>
+                <td class="pos">+11.60%</td>
+                <td>2.2%</td>
+              </tr>
+              <tr>
+                <td>XRP · SR+MACD</td>
+                <td>Long only</td>
+                <td class="pos">42%</td>
+                <td class="pos">+7.79%</td>
+                <td>10.4%</td>
+              </tr>
+              <tr>
+                <td>SOL · MACD+RSI</td>
+                <td>Short only</td>
+                <td class="pos">42%</td>
+                <td class="pos">+7.66%</td>
+                <td>9.7%</td>
+              </tr>
+            </table>
+            <div
+              class="callout green"
+              style="margin-top: 10px; font-size: 0.83rem"
+            >
+              Direction filtering turns losing strategies profitable. SOL/BNB
+              fell sharply in 2025 — shorts won. XRP rallied — longs won.
+              <strong
+                >Same strategies, right direction = completely different
+                results.</strong
+              >
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div>
-      <h2>Direction-filtered — top performers</h2>
-      <table>
-        <tr><th>Coin · Strategy</th><th>Filter</th><th>Win%</th><th>Return</th><th>Max DD</th></tr>
-        <tr class="best"><td>SOL · SR+MACD</td><td>Short only</td><td class="pos">55%</td><td class="pos" style="font-weight:700">+19.61%</td><td>2.4%</td></tr>
-        <tr class="best"><td>BNB · BB+RSI</td><td>Short only</td><td class="pos">49%</td><td class="pos">+14.45%</td><td>5.6%</td></tr>
-        <tr><td>XRP · BB_Squeeze</td><td>Long only</td><td class="pos">56%</td><td class="pos">+11.60%</td><td>2.2%</td></tr>
-        <tr><td>XRP · SR+MACD</td><td>Long only</td><td class="pos">42%</td><td class="pos">+7.79%</td><td>10.4%</td></tr>
-        <tr><td>SOL · MACD+RSI</td><td>Short only</td><td class="pos">42%</td><td class="pos">+7.66%</td><td>9.7%</td></tr>
-      </table>
-      <div class="callout green" style="margin-top:10px;font-size:.83rem">
-        Direction filtering turns losing strategies profitable. SOL/BNB fell sharply in 2025 — shorts won. XRP rallied — longs won. <strong>Same strategies, right direction = completely different results.</strong>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Slide 19d: $100 Simulation -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Capital Simulation</div>
-  <h1>If You Started with $100 in Nov 2024…</h1>
-  <p style="font-size:.87rem;color:#64748b;margin-bottom:12px">1% equity risk per trade &nbsp;·&nbsp; 20× max leverage &nbsp;·&nbsp; fees + funding included &nbsp;·&nbsp; 7 months (4,000 candles)</p>
-  <div class="two-col">
-    <div>
-      <h2>Best outcomes (direction-filtered)</h2>
-      <table>
-        <tr><th>Strategy</th><th>Direction</th><th>Start</th><th>End</th><th>Gain</th></tr>
-        <tr class="best"><td>SOL SR+MACD</td><td>Short only</td><td>$100</td><td class="pos" style="font-weight:700;font-size:1.05rem">$119.61</td><td class="pos">+$19.61</td></tr>
-        <tr class="best"><td>BNB BB+RSI</td><td>Short only</td><td>$100</td><td class="pos">$114.45</td><td class="pos">+$14.45</td></tr>
-        <tr><td>BNB BB+RSI</td><td>Both sides</td><td>$100</td><td class="pos">$111.92</td><td class="pos">+$11.92</td></tr>
-        <tr><td>XRP BB_Squeeze</td><td>Long only</td><td>$100</td><td class="pos">$111.60</td><td class="pos">+$11.60</td></tr>
-      </table>
-      <div class="callout green" style="margin-top:10px;font-size:.83rem">
-        XRP BB_Squeeze long-only: <strong>max drawdown only 2.2%</strong> — the $100 barely dipped the whole run. SOL SR+MACD short-only: max drawdown only <strong>2.4%</strong> with the highest return.
+      <!-- Slide 19d: $100 Simulation -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Capital Simulation</div>
+        <h1>If You Started with $100 in Nov 2024…</h1>
+        <p style="font-size: 0.87rem; color: #64748b; margin-bottom: 12px">
+          1% equity risk per trade &nbsp;·&nbsp; 20× max leverage &nbsp;·&nbsp;
+          fees + funding included &nbsp;·&nbsp; 7 months (4,000 candles)
+        </p>
+        <div class="two-col">
+          <div>
+            <h2>Best outcomes (direction-filtered)</h2>
+            <table>
+              <tr>
+                <th>Strategy</th>
+                <th>Direction</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Gain</th>
+              </tr>
+              <tr class="best">
+                <td>SOL SR+MACD</td>
+                <td>Short only</td>
+                <td>$100</td>
+                <td class="pos" style="font-weight: 700; font-size: 1.05rem">
+                  $119.61
+                </td>
+                <td class="pos">+$19.61</td>
+              </tr>
+              <tr class="best">
+                <td>BNB BB+RSI</td>
+                <td>Short only</td>
+                <td>$100</td>
+                <td class="pos">$114.45</td>
+                <td class="pos">+$14.45</td>
+              </tr>
+              <tr>
+                <td>BNB BB+RSI</td>
+                <td>Both sides</td>
+                <td>$100</td>
+                <td class="pos">$111.92</td>
+                <td class="pos">+$11.92</td>
+              </tr>
+              <tr>
+                <td>XRP BB_Squeeze</td>
+                <td>Long only</td>
+                <td>$100</td>
+                <td class="pos">$111.60</td>
+                <td class="pos">+$11.60</td>
+              </tr>
+            </table>
+            <div
+              class="callout green"
+              style="margin-top: 10px; font-size: 0.83rem"
+            >
+              XRP BB_Squeeze long-only:
+              <strong>max drawdown only 2.2%</strong> — the $100 barely dipped
+              the whole run. SOL SR+MACD short-only: max drawdown only
+              <strong>2.4%</strong> with the highest return.
+            </div>
+          </div>
+          <div>
+            <h2>Worst outcomes (both sides, unfiltered)</h2>
+            <table>
+              <tr>
+                <th>Strategy</th>
+                <th>Direction</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Loss</th>
+              </tr>
+              <tr class="worst">
+                <td>ETH MACD+RSI</td>
+                <td>Both sides</td>
+                <td>$100</td>
+                <td class="neg" style="font-weight: 700">$73.32</td>
+                <td class="neg">−$26.68</td>
+              </tr>
+              <tr class="worst">
+                <td>BTC SR+MACD</td>
+                <td>Both sides</td>
+                <td>$100</td>
+                <td class="neg">$76.13</td>
+                <td class="neg">−$23.87</td>
+              </tr>
+              <tr class="worst">
+                <td>BTC BB_Squeeze</td>
+                <td>Both sides</td>
+                <td>$100</td>
+                <td class="neg">$76.50</td>
+                <td class="neg">−$23.50</td>
+              </tr>
+              <tr>
+                <td>SOL SR+MACD</td>
+                <td>Both sides</td>
+                <td>$100</td>
+                <td class="neg">$97.37</td>
+                <td class="neg">−$2.63</td>
+              </tr>
+            </table>
+            <div
+              class="callout amber"
+              style="margin-top: 10px; font-size: 0.83rem"
+            >
+              <strong>Same SOL SR+MACD strategy:</strong> both-sides = −$2.63
+              &nbsp;|&nbsp; short-only = +$19.61. The strategy is right —
+              direction makes the $22 difference.
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 10px; font-size: 0.84rem">
+          <strong>Annualized projection (167-day window):</strong>
+          &nbsp;SOL SR+MACD short-only ≈
+          <span style="color: #34d399; font-weight: 700">+42%/yr</span>
+          &nbsp;·&nbsp; BNB BB+RSI short-only ≈
+          <span style="color: #34d399; font-weight: 700">+31%/yr</span>
+          &nbsp;·&nbsp; XRP BB_Squeeze long-only ≈
+          <span style="color: #34d399; font-weight: 700">+25%/yr</span>
+          &nbsp;·&nbsp; Returns scale linearly — $1,000 starting capital gives
+          the same percentages.
+        </div>
       </div>
-    </div>
-    <div>
-      <h2>Worst outcomes (both sides, unfiltered)</h2>
-      <table>
-        <tr><th>Strategy</th><th>Direction</th><th>Start</th><th>End</th><th>Loss</th></tr>
-        <tr class="worst"><td>ETH MACD+RSI</td><td>Both sides</td><td>$100</td><td class="neg" style="font-weight:700">$73.32</td><td class="neg">−$26.68</td></tr>
-        <tr class="worst"><td>BTC SR+MACD</td><td>Both sides</td><td>$100</td><td class="neg">$76.13</td><td class="neg">−$23.87</td></tr>
-        <tr class="worst"><td>BTC BB_Squeeze</td><td>Both sides</td><td>$100</td><td class="neg">$76.50</td><td class="neg">−$23.50</td></tr>
-        <tr><td>SOL SR+MACD</td><td>Both sides</td><td>$100</td><td class="neg">$97.37</td><td class="neg">−$2.63</td></tr>
-      </table>
-      <div class="callout amber" style="margin-top:10px;font-size:.83rem">
-        <strong>Same SOL SR+MACD strategy:</strong> both-sides = −$2.63 &nbsp;|&nbsp; short-only = +$19.61. The strategy is right — direction makes the $22 difference.
-      </div>
-    </div>
-  </div>
-  <div class="callout" style="margin-top:10px;font-size:.84rem">
-    <strong>Annualized projection (167-day window):</strong>
-    &nbsp;SOL SR+MACD short-only ≈ <span style="color:#34d399;font-weight:700">+42%/yr</span>
-    &nbsp;·&nbsp; BNB BB+RSI short-only ≈ <span style="color:#34d399;font-weight:700">+31%/yr</span>
-    &nbsp;·&nbsp; XRP BB_Squeeze long-only ≈ <span style="color:#34d399;font-weight:700">+25%/yr</span>
-    &nbsp;·&nbsp; Returns scale linearly — $1,000 starting capital gives the same percentages.
-  </div>
-</div>
 
-<!-- Slide 19e: 3 Keys to Profitability -->
-<div class="slide" data-s="3">
-  <div class="chip">Speaker 3 · Profitability Framework</div>
-  <h1>3 Keys to Long-Term Profitability</h1>
-  <p style="font-size:.87rem;color:#64748b;margin-bottom:12px">What 7 months of backtesting taught us — each key is necessary, none is sufficient alone</p>
-  <div class="three-col">
-    <div class="card">
-      <div class="card-tag" style="background:#1e3a5f;color:#60a5fa">Key 1</div>
-      <div class="card-title">Regime Detection<br><span style="font-size:.82rem;color:#64748b;font-weight:400">Use the right tool for the market</span></div>
-      <p>Trending market → use EMA / MACD / EMA Pullback. Ranging market → use BB / BB Squeeze. Using a trend strategy when ADX is low causes constant whipsaws. Using BB when ADX is high gets stopped out on every breakout.</p>
-      <div style="margin-top:10px;background:#0f172a;border-radius:6px;padding:8px 10px;font-size:.81rem">
-        <span style="color:#34d399">ADX &gt; 22</span> → trend strategy<br>
-        <span style="color:#f87171">ADX &lt; 20</span> → mean reversion<br>
-        <span style="color:#fbbf24">20–22</span> → no trade
+      <!-- Slide 19e: 3 Keys to Profitability -->
+      <div class="slide" data-s="3">
+        <div class="chip">Speaker 3 · Profitability Framework</div>
+        <h1>3 Keys to Long-Term Profitability</h1>
+        <p style="font-size: 0.87rem; color: #64748b; margin-bottom: 12px">
+          What 7 months of backtesting taught us — each key is necessary, none
+          is sufficient alone
+        </p>
+        <div class="three-col">
+          <div class="card">
+            <div class="card-tag" style="background: #1e3a5f; color: #60a5fa">
+              Key 1
+            </div>
+            <div class="card-title">
+              Regime Detection<br /><span
+                style="font-size: 0.82rem; color: #64748b; font-weight: 400"
+                >Use the right tool for the market</span
+              >
+            </div>
+            <p>
+              Trending market → use EMA / MACD / EMA Pullback. Ranging market →
+              use BB / BB Squeeze. Using a trend strategy when ADX is low causes
+              constant whipsaws. Using BB when ADX is high gets stopped out on
+              every breakout.
+            </p>
+            <div
+              style="
+                margin-top: 10px;
+                background: #0f172a;
+                border-radius: 6px;
+                padding: 8px 10px;
+                font-size: 0.81rem;
+              "
+            >
+              <span style="color: #34d399">ADX &gt; 22</span> → trend
+              strategy<br />
+              <span style="color: #f87171">ADX &lt; 20</span> → mean
+              reversion<br />
+              <span style="color: #fbbf24">20–22</span> → no trade
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-tag" style="background: #064e3b; color: #34d399">
+              Key 2
+            </div>
+            <div class="card-title">
+              Direction Bias<br /><span
+                style="font-size: 0.82rem; color: #64748b; font-weight: 400"
+                >Only trade WITH the macro trend</span
+              >
+            </div>
+            <p>
+              In a bull market, only go long. In a bear market, only go short.
+              Use EMA(200) slope and EMA(50) slope to confirm the macro
+              direction. Ignore countertrend signals entirely — they add losses,
+              not opportunity.
+            </p>
+            <div
+              style="
+                margin-top: 10px;
+                background: #0f172a;
+                border-radius: 6px;
+                padding: 8px 10px;
+                font-size: 0.81rem;
+              "
+            >
+              SOL SR+MACD <span style="color: #f87171">both-sides</span>:
+              −2.63%<br />
+              SOL SR+MACD <span style="color: #34d399">short-only</span>:
+              +19.61%<br />
+              <span style="color: #475569"
+                >Same strategy. $22 difference on $100.</span
+              >
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-tag" style="background: #451a03; color: #fbbf24">
+              Key 3
+            </div>
+            <div class="card-title">
+              Exit Mastery<br /><span
+                style="font-size: 0.82rem; color: #64748b; font-weight: 400"
+                >Lock profit early, let winners run</span
+              >
+            </div>
+            <p>
+              The entry is only half the trade. Two-stage exit locks 50% at +2R
+              immediately — you've already won on that half. Chandelier Exit
+              trails the rest, letting a +2R trade become +5R or +8R without
+              giving back the locked portion.
+            </p>
+            <div
+              style="
+                margin-top: 10px;
+                background: #0f172a;
+                border-radius: 6px;
+                padding: 8px 10px;
+                font-size: 0.81rem;
+              "
+            >
+              Simple TP/SL: all-or-nothing<br />
+              <span style="color: #34d399">Two-stage:</span> partial win always
+              secured<br />
+              <span style="color: #475569">Max drawdown on XRP BB: 2.2%</span>
+            </div>
+          </div>
+        </div>
+        <div class="callout green" style="margin-top: 12px; font-size: 0.84rem">
+          <strong>The formula:</strong> pick the right strategy for the regime →
+          trade only with the macro direction → exit in two stages to lock and
+          run. All three together: SOL SR+MACD short-only in bear =
+          <strong>+19.61%, dd 2.4%, 55% win rate, 55 trades</strong>.
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <div class="card-tag" style="background:#064e3b;color:#34d399">Key 2</div>
-      <div class="card-title">Direction Bias<br><span style="font-size:.82rem;color:#64748b;font-weight:400">Only trade WITH the macro trend</span></div>
-      <p>In a bull market, only go long. In a bear market, only go short. Use EMA(200) slope and EMA(50) slope to confirm the macro direction. Ignore countertrend signals entirely — they add losses, not opportunity.</p>
-      <div style="margin-top:10px;background:#0f172a;border-radius:6px;padding:8px 10px;font-size:.81rem">
-        SOL SR+MACD <span style="color:#f87171">both-sides</span>: −2.63%<br>
-        SOL SR+MACD <span style="color:#34d399">short-only</span>: +19.61%<br>
-        <span style="color:#475569">Same strategy. $22 difference on $100.</span>
+
+      <!-- ═══════════════ SPEAKER 4 — DEMO + CONCLUSIONS ═══════════════ -->
+
+      <!-- Slide 20 -->
+      <div class="slide" data-s="4">
+        <div class="chip">Speaker 4 · Demo &amp; Conclusions</div>
+        <h1>What We Actually Learned</h1>
+        <div class="two-col">
+          <div>
+            <h2>Strategy autopsies — updated results</h2>
+            <ul>
+              <li style="margin-bottom: 7px">
+                <strong>EMA (−3.36% bear, −5.72% bull):</strong> 4H MTF +
+                EMA(200) buffer cuts noise. ETH +9.28% in bear — two-stage exit
+                captured the full move. Still negative avg without regime bias.
+              </li>
+              <li style="margin-bottom: 7px">
+                <strong>MACD (−2.18% bear, −11.70% bull):</strong> Session
+                filter + ADX gate improved bear significantly. Still worst in
+                bull — fires against the bull trend.
+              </li>
+              <li style="margin-bottom: 7px">
+                <strong>BB (+0.34% bear, +4.57% bull long-only):</strong> ADX
+                ranging gate unlocks BB's edge.
+                <strong>First consistently positive strategy.</strong> BNB
+                +19.15% in bull unfiltered.
+              </li>
+              <li style="margin-bottom: 7px">
+                <strong>SR+MACD bear short-only: +1.92%</strong> — best bear
+                strategy with directional bias. BTC short-only +12.79%.
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h2>The five real lessons</h2>
+            <ul>
+              <li style="margin-bottom: 7px">
+                <strong>Direction is the biggest lever.</strong> SOL SR+MACD
+                short-only +19.61% vs both-sides −2.63%. XRP BB_Squeeze
+                long-only +11.60% vs both-sides +11.37%. Same strategy, right
+                direction.
+              </li>
+              <li style="margin-bottom: 7px">
+                <strong>Exit design matters as much as entry.</strong> Two-stage
+                exit locked profits; Chandelier trailed winners. Avg cost cut
+                from 10–27% → 4–7%.
+              </li>
+              <li style="margin-bottom: 7px">
+                <strong>Win rates improved to 39–56%</strong> (vs 20–28% at 15m)
+                — timeframe + filters together. XRP BB_Squeeze long-only hit
+                <strong>56% win rate</strong>.
+              </li>
+              <li style="margin-bottom: 7px">
+                <strong>Coin selection matters.</strong> 7-month: XRP and BNB
+                dominated positive results; BTC/ETH/SOL mostly negative
+                both-sides. Different coins suit different strategies.
+              </li>
+              <li>
+                <strong>ATR stops + volatility sizing &gt; fixed %.</strong>
+                SOL/XRP spikes auto-reduce position size. XRP BB_Squeeze max
+                drawdown only 2.2%.
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="card">
-      <div class="card-tag" style="background:#451a03;color:#fbbf24">Key 3</div>
-      <div class="card-title">Exit Mastery<br><span style="font-size:.82rem;color:#64748b;font-weight:400">Lock profit early, let winners run</span></div>
-      <p>The entry is only half the trade. Two-stage exit locks 50% at +2R immediately — you've already won on that half. Chandelier Exit trails the rest, letting a +2R trade become +5R or +8R without giving back the locked portion.</p>
-      <div style="margin-top:10px;background:#0f172a;border-radius:6px;padding:8px 10px;font-size:.81rem">
-        Simple TP/SL: all-or-nothing<br>
-        <span style="color:#34d399">Two-stage:</span> partial win always secured<br>
-        <span style="color:#475569">Max drawdown on XRP BB: 2.2%</span>
-      </div>
-    </div>
-  </div>
-  <div class="callout green" style="margin-top:12px;font-size:.84rem">
-    <strong>The formula:</strong> pick the right strategy for the regime → trade only with the macro direction → exit in two stages to lock and run.
-    All three together: SOL SR+MACD short-only in bear = <strong>+19.61%, dd 2.4%, 55% win rate, 55 trades</strong>.
-  </div>
-</div>
 
-<!-- ═══════════════ SPEAKER 4 — DEMO + CONCLUSIONS ═══════════════ -->
-
-<!-- Slide 20 -->
-<div class="slide" data-s="4">
-  <div class="chip">Speaker 4 · Demo &amp; Conclusions</div>
-  <h1>What We Actually Learned</h1>
-  <div class="two-col">
-    <div>
-      <h2>Strategy autopsies — updated results</h2>
-      <ul>
-        <li style="margin-bottom:7px"><strong>EMA (−3.36% bear, −5.72% bull):</strong> 4H MTF + EMA(200) buffer cuts noise. ETH +9.28% in bear — two-stage exit captured the full move. Still negative avg without regime bias.</li>
-        <li style="margin-bottom:7px"><strong>MACD (−2.18% bear, −11.70% bull):</strong> Session filter + ADX gate improved bear significantly. Still worst in bull — fires against the bull trend.</li>
-        <li style="margin-bottom:7px"><strong>BB (+0.34% bear, +4.57% bull long-only):</strong> ADX ranging gate unlocks BB's edge. <strong>First consistently positive strategy.</strong> BNB +19.15% in bull unfiltered.</li>
-        <li style="margin-bottom:7px"><strong>SR+MACD bear short-only: +1.92%</strong> — best bear strategy with directional bias. BTC short-only +12.79%.</li>
-      </ul>
-    </div>
-    <div>
-      <h2>The five real lessons</h2>
-      <ul>
-        <li style="margin-bottom:7px"><strong>Direction is the biggest lever.</strong> SOL SR+MACD short-only +19.61% vs both-sides −2.63%. XRP BB_Squeeze long-only +11.60% vs both-sides +11.37%. Same strategy, right direction.</li>
-        <li style="margin-bottom:7px"><strong>Exit design matters as much as entry.</strong> Two-stage exit locked profits; Chandelier trailed winners. Avg cost cut from 10–27% → 4–7%.</li>
-        <li style="margin-bottom:7px"><strong>Win rates improved to 39–56%</strong> (vs 20–28% at 15m) — timeframe + filters together. XRP BB_Squeeze long-only hit <strong>56% win rate</strong>.</li>
-        <li style="margin-bottom:7px"><strong>Coin selection matters.</strong> 7-month: XRP and BNB dominated positive results; BTC/ETH/SOL mostly negative both-sides. Different coins suit different strategies.</li>
-        <li><strong>ATR stops + volatility sizing &gt; fixed %.</strong> SOL/XRP spikes auto-reduce position size. XRP BB_Squeeze max drawdown only 2.2%.</li>
-      </ul>
-    </div>
-  </div>
-</div>
-
-<!-- Slide 21 -->
-<div class="slide" data-s="4">
-  <div class="chip">Speaker 4 · Demo</div>
-  <h1>Running the Bot — Live Demo</h1>
-  <div class="two-col">
-    <div>
-      <h2>Single scan</h2>
-      <pre><span class="c"># Scan all 5 symbols, one time</span>
+      <!-- Slide 21 -->
+      <div class="slide" data-s="4">
+        <div class="chip">Speaker 4 · Demo</div>
+        <h1>Running the Bot — Live Demo</h1>
+        <div class="two-col">
+          <div>
+            <h2>Single scan</h2>
+            <pre><span class="c"># Scan all 5 symbols, one time</span>
 <span class="g">STRATEGY</span>=macd \
 <span class="g">SYMBOLS</span>=BTC/USDT:USDT,BNB/USDT:USDT \
 <span class="b">python</span> -m src.bot</pre>
-      <h2 style="margin-top:16px">Continuous loop</h2>
-      <pre><span class="c"># Re-run every 15 minutes</span>
+            <h2 style="margin-top: 16px">Continuous loop</h2>
+            <pre><span class="c"># Re-run every 15 minutes</span>
 <span class="b">python</span> -m src.bot --loop
 <span class="c"># → checks signal → places VST order
 # → logs to data/trades_btc.csv</span></pre>
-    </div>
-    <div>
-      <h2>Generate backtest report</h2>
-      <pre><span class="b">backtest_venv/bin/python</span> \
+          </div>
+          <div>
+            <h2>Generate backtest report</h2>
+            <pre><span class="b">backtest_venv/bin/python</span> \
   -m scripts.run_backtest
 
 <span class="c"># Output:
@@ -1032,130 +2418,221 @@ net_pnl = gross − fee − funding</pre>
 #   - Metrics comparison
 #   - Return heatmap
 #   - Fee breakdown</span></pre>
-      <div class="callout purple" style="margin-top:14px;font-size:.85rem">
-        Strategies available: <strong>ema</strong> | <strong>macd</strong> | <strong>bollinger</strong> | <strong>sr_breakout</strong> | <strong>adaptive</strong>
+            <div
+              class="callout purple"
+              style="margin-top: 14px; font-size: 0.85rem"
+            >
+              Strategies available: <strong>ema</strong> |
+              <strong>macd</strong> | <strong>bollinger</strong> |
+              <strong>sr_breakout</strong> | <strong>adaptive</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 22 -->
+      <div class="slide" data-s="4">
+        <div class="chip">Speaker 4 · Conclusions</div>
+        <h1>Limitations — What This Backtest Cannot Tell Us</h1>
+        <ul>
+          <li style="margin-bottom: 9px">
+            <strong>Two windows may not generalize.</strong> We tested one bear
+            period (Apr–May 2025, 83 days) and one bull period (Nov 2024–Jan
+            2025, 83 days). More windows and more symbols needed for statistical
+            confidence.
+          </li>
+          <li style="margin-bottom: 9px">
+            <strong>No slippage modelled.</strong> Real market orders get
+            slightly worse prices than the theoretical TP/SL. We assumed exact
+            execution.
+          </li>
+          <li style="margin-bottom: 9px">
+            <strong>Funding rate assumed constant.</strong> BingX funding ranges
+            from −0.03% to +0.10% per 8h. We used the standard 0.01% estimate.
+          </li>
+          <li style="margin-bottom: 9px">
+            <strong>One position per symbol.</strong> A real portfolio would
+            need to handle correlation between BTC and ETH moving together.
+          </li>
+          <li>
+            <strong>No parameter optimization.</strong> We did not test whether
+            EMA(9,21) beats EMA(10,20) or (12,26). The published parameters are
+            textbook defaults, not optimized for crypto.
+          </li>
+        </ul>
+      </div>
+
+      <!-- Slide 23 -->
+      <div class="slide" data-s="4">
+        <div class="chip">Speaker 4 · Conclusions</div>
+        <h1>What We'd Do Next</h1>
+        <div class="two-col">
+          <div>
+            <h2>Already built ✓</h2>
+            <ul>
+              <li>ATR-based dynamic stop loss (all strategies)</li>
+              <li>Leverage + funding rate cost model</li>
+              <li>Multi-symbol, multi-strategy report</li>
+              <li>Liquidation guard in backtest engine</li>
+              <li>
+                <strong>Adaptive regime-switching strategy</strong> (BB↔MACD +
+                8-filter gate)
+              </li>
+              <li>RSI double confirmation on all strategies</li>
+              <li>
+                <strong>Two-stage exit + Chandelier Exit</strong> (ATR×2.5
+                trailing)
+              </li>
+              <li>
+                <strong>ADX(14) regime gate</strong> for BB vs MACD selection
+              </li>
+              <li><strong>4H MTF confirmation</strong> on all strategies</li>
+              <li>
+                <strong>Session filter</strong> (08:00–20:00 UTC, Mon–Fri)
+              </li>
+              <li><strong>Volatility-adjusted position sizing</strong></li>
+              <li><strong>EMA(200) buffer ±0.5%</strong></li>
+            </ul>
+          </div>
+          <div>
+            <h2>Next sprint</h2>
+            <ul>
+              <li>
+                Tune Adaptive filter thresholds to allow more trades without
+                sacrificing quality
+              </li>
+              <li>
+                Walk-forward validation to avoid curve-fitting the backtest
+                window
+              </li>
+              <li>
+                Apply long/short bias flag to all strategies automatically (not
+                manual)
+              </li>
+            </ul>
+            <h2 style="margin-top: 16px">Longer term</h2>
+            <ul>
+              <li>TradingView Pine Script integration via webhook (Path A)</li>
+              <li>Simple ML signal filter to reject low-probability setups</li>
+              <li>
+                Portfolio-level correlation limits (BTC + ETH tend to move
+                together)
+              </li>
+            </ul>
+            <div
+              class="callout green"
+              style="margin-top: 18px; font-size: 0.85rem"
+            >
+              The framework is ready. Each improvement is a strategy class away
+              — no architecture changes needed.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 24 -->
+      <div class="slide" data-s="4">
+        <div class="chip">Speaker 4 · Conclusions</div>
+        <h1>Conclusion</h1>
+        <p style="font-size: 1.05rem; margin-bottom: 20px">
+          Our original question:
+          <strong
+            >do common technical strategies work on crypto futures after
+            fees?</strong
+          >
+        </p>
+        <div class="three-col">
+          <div class="card">
+            <div class="card-title">Yes — with the right direction</div>
+            <p>
+              <strong>7 months: XRP BB_Squeeze long-only +11.60%</strong> (dd
+              2.2%). SOL SR+MACD short-only <strong>+19.61%</strong> (dd 2.4%).
+              $100 → $119.61. Regime + direction = the real unlock.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title">Exit design changes everything</div>
+            <p>
+              Two-stage exit + Chandelier replaced simple 1R trailing. Costs cut
+              from 10–27% → 4–7%. Win rates up from 20–28% → 39–50%. ETH EMA
+              +9.28%, BNB BB +19.15%.
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-title">The framework works</div>
+            <p>
+              The bot fetches live data, generates signals, manages risk, and
+              places demo orders autonomously. 6 strategies, 6 filters, one
+              unified architecture.
+            </p>
+          </div>
+        </div>
+        <div class="callout green" style="margin-top: 20px">
+          Over 7 months,
+          <strong>direction-filtered strategies outperform massively</strong>:
+          SOL shorts +19.61%, XRP longs +11.60% — both with under 2.5% drawdown.
+          The same strategy unfiltered? Near zero or negative.
+          <strong>Knowing which direction to trade is the final unlock.</strong>
+        </div>
+      </div>
+
+      <!-- Slide 25 -->
+      <div class="slide" data-s="0">
+        <div class="title-big" style="font-size: 2rem">Thank you.</div>
+        <div class="title-sub">
+          Algorithmic Trading Bot on BingX Perpetual Futures
+        </div>
+        <div style="margin-top: 24px; color: #475569; font-size: 0.95rem">
+          Source code · Backtest report · Slide deck available on GitHub
+        </div>
+        <div
+          style="
+            margin-top: 32px;
+            font-size: 1.3rem;
+            color: #64748b;
+            font-weight: 600;
+          "
+        >
+          Q &amp; A
+        </div>
+        <div class="divider-num">Q&A</div>
       </div>
     </div>
-  </div>
-</div>
+    <!-- /deck -->
 
-<!-- Slide 22 -->
-<div class="slide" data-s="4">
-  <div class="chip">Speaker 4 · Conclusions</div>
-  <h1>Limitations — What This Backtest Cannot Tell Us</h1>
-  <ul>
-    <li style="margin-bottom:9px"><strong>Two windows may not generalize.</strong> We tested one bear period (Apr–May 2025, 83 days) and one bull period (Nov 2024–Jan 2025, 83 days). More windows and more symbols needed for statistical confidence.</li>
-    <li style="margin-bottom:9px"><strong>No slippage modelled.</strong> Real market orders get slightly worse prices than the theoretical TP/SL. We assumed exact execution.</li>
-    <li style="margin-bottom:9px"><strong>Funding rate assumed constant.</strong> BingX funding ranges from −0.03% to +0.10% per 8h. We used the standard 0.01% estimate.</li>
-    <li style="margin-bottom:9px"><strong>One position per symbol.</strong> A real portfolio would need to handle correlation between BTC and ETH moving together.</li>
-    <li><strong>No parameter optimization.</strong> We did not test whether EMA(9,21) beats EMA(10,20) or (12,26). The published parameters are textbook defaults, not optimized for crypto.</li>
-  </ul>
-</div>
+    <nav id="nav">
+      <button id="prev">← Prev</button>
+      <span id="counter"></span>
+      <button id="next">Next →</button>
+    </nav>
 
-<!-- Slide 23 -->
-<div class="slide" data-s="4">
-  <div class="chip">Speaker 4 · Conclusions</div>
-  <h1>What We'd Do Next</h1>
-  <div class="two-col">
-    <div>
-      <h2>Already built ✓</h2>
-      <ul>
-        <li>ATR-based dynamic stop loss (all strategies)</li>
-        <li>Leverage + funding rate cost model</li>
-        <li>Multi-symbol, multi-strategy report</li>
-        <li>Liquidation guard in backtest engine</li>
-        <li><strong>Adaptive regime-switching strategy</strong> (BB↔MACD + 8-filter gate)</li>
-        <li>RSI double confirmation on all strategies</li>
-        <li><strong>Two-stage exit + Chandelier Exit</strong> (ATR×2.5 trailing)</li>
-        <li><strong>ADX(14) regime gate</strong> for BB vs MACD selection</li>
-        <li><strong>4H MTF confirmation</strong> on all strategies</li>
-        <li><strong>Session filter</strong> (08:00–20:00 UTC, Mon–Fri)</li>
-        <li><strong>Volatility-adjusted position sizing</strong></li>
-        <li><strong>EMA(200) buffer ±0.5%</strong></li>
-      </ul>
-    </div>
-    <div>
-      <h2>Next sprint</h2>
-      <ul>
-        <li>Tune Adaptive filter thresholds to allow more trades without sacrificing quality</li>
-        <li>Walk-forward validation to avoid curve-fitting the backtest window</li>
-        <li>Apply long/short bias flag to all strategies automatically (not manual)</li>
-      </ul>
-      <h2 style="margin-top:16px">Longer term</h2>
-      <ul>
-        <li>TradingView Pine Script integration via webhook (Path A)</li>
-        <li>Simple ML signal filter to reject low-probability setups</li>
-        <li>Portfolio-level correlation limits (BTC + ETH tend to move together)</li>
-      </ul>
-      <div class="callout green" style="margin-top:18px;font-size:.85rem">
-        The framework is ready. Each improvement is a strategy class away — no architecture changes needed.
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Slide 24 -->
-<div class="slide" data-s="4">
-  <div class="chip">Speaker 4 · Conclusions</div>
-  <h1>Conclusion</h1>
-  <p style="font-size:1.05rem;margin-bottom:20px">Our original question: <strong>do common technical strategies work on crypto futures after fees?</strong></p>
-  <div class="three-col">
-    <div class="card">
-      <div class="card-title">Yes — with the right direction</div>
-      <p><strong>7 months: XRP BB_Squeeze long-only +11.60%</strong> (dd 2.2%). SOL SR+MACD short-only <strong>+19.61%</strong> (dd 2.4%). $100 → $119.61. Regime + direction = the real unlock.</p>
-    </div>
-    <div class="card">
-      <div class="card-title">Exit design changes everything</div>
-      <p>Two-stage exit + Chandelier replaced simple 1R trailing. Costs cut from 10–27% → 4–7%. Win rates up from 20–28% → 39–50%. ETH EMA +9.28%, BNB BB +19.15%.</p>
-    </div>
-    <div class="card">
-      <div class="card-title">The framework works</div>
-      <p>The bot fetches live data, generates signals, manages risk, and places demo orders autonomously. 6 strategies, 6 filters, one unified architecture.</p>
-    </div>
-  </div>
-  <div class="callout green" style="margin-top:20px">
-    Over 7 months, <strong>direction-filtered strategies outperform massively</strong>: SOL shorts +19.61%, XRP longs +11.60% — both with under 2.5% drawdown. The same strategy unfiltered? Near zero or negative. <strong>Knowing which direction to trade is the final unlock.</strong>
-  </div>
-</div>
-
-<!-- Slide 25 -->
-<div class="slide" data-s="0">
-  <div class="title-big" style="font-size:2rem">Thank you.</div>
-  <div class="title-sub">Algorithmic Trading Bot on BingX Perpetual Futures</div>
-  <div style="margin-top:24px;color:#475569;font-size:.95rem">
-    Source code · Backtest report · Slide deck available on GitHub
-  </div>
-  <div style="margin-top:32px;font-size:1.3rem;color:#64748b;font-weight:600">Q &amp; A</div>
-  <div class="divider-num">Q&A</div>
-</div>
-
-</div><!-- /deck -->
-
-<nav id="nav">
-  <button id="prev">← Prev</button>
-  <span id="counter"></span>
-  <button id="next">Next →</button>
-</nav>
-
-<script>
-const slides = Array.from(document.querySelectorAll('.slide'));
-let cur = 0;
-function go(n) {
-  slides[cur].classList.remove('active');
-  cur = Math.max(0, Math.min(n, slides.length - 1));
-  slides[cur].classList.add('active');
-  document.getElementById('counter').textContent = (cur + 1) + ' / ' + slides.length;
-  document.getElementById('progress').style.width = ((cur + 1) / slides.length * 100) + '%';
-  document.getElementById('prev').disabled = cur === 0;
-  document.getElementById('next').disabled = cur === slides.length - 1;
-}
-document.getElementById('prev').onclick = () => go(cur - 1);
-document.getElementById('next').onclick = () => go(cur + 1);
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); go(cur + 1); }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); go(cur - 1); }
-});
-go(0);
-</script>
-</body>
+    <script>
+      const slides = Array.from(document.querySelectorAll(".slide"));
+      let cur = 0;
+      function go(n) {
+        slides[cur].classList.remove("active");
+        cur = Math.max(0, Math.min(n, slides.length - 1));
+        slides[cur].classList.add("active");
+        document.getElementById("counter").textContent =
+          cur + 1 + " / " + slides.length;
+        document.getElementById("progress").style.width =
+          ((cur + 1) / slides.length) * 100 + "%";
+        document.getElementById("prev").disabled = cur === 0;
+        document.getElementById("next").disabled = cur === slides.length - 1;
+      }
+      document.getElementById("prev").onclick = () => go(cur - 1);
+      document.getElementById("next").onclick = () => go(cur + 1);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
+          e.preventDefault();
+          go(cur + 1);
+        }
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          e.preventDefault();
+          go(cur - 1);
+        }
+      });
+      go(0);
+    </script>
+  </body>
 </html>
